@@ -1,0 +1,17 @@
+# Terraform build stuff
+secrets.auto.tfvars
+.terraform
+*.zip
+build
+package
+.terraform.lock.hcl
+.terraform.lock
+*.tfstate
+*.tfstate.backup
+
+# MacOS
+.DS_Store
+
+# vscode
+.vscode/vendor
+.vscode
