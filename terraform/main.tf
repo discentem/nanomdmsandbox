@@ -8,40 +8,15 @@
 # - route53 records
 # 
 
-# module "nanomdm_ecr" {
-#   source               = "./modules/ecr"
-#   repository_name      = "nanomdm"
-#   image_tag_mutability = "MUTABLE"
-# }
-
-terraform {
-  required_version = ">= 1.1.9"
-  backend "local" {
-  }
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 4.12.1"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-  default_tags {
-    tags = {
-      Name = "nanomdm"
-    }
-  }
-  access_key = var.AWS_ACCESS_KEY
-  secret_key = var.AWS_SECRET_KEY
+module "nanomdm_ecr" {
+  source               = "./modules/ecr"
+  repository_name      = var.repository_name
+  image_tag_mutability = var.image_tag_mutability
 }
 
 module "route53" {
-  source      = "./nanomdm/modules/route53"
+  source      = "./modules/route53"
   domain_name = var.domain_name
-  ttl         = var.ttl
 }
 
 # module "fargate" {
