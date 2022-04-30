@@ -19,6 +19,15 @@ module "route53" {
   domain_name = var.domain_name
 }
 
-# module "fargate" {
-#   ecr_arn = nanmodm_ecr.repository_arn
-# }
+module "vpc" {
+
+}
+
+module "alb" {
+
+}
+
+module "ecs" {
+  alb_arn = alb.arn
+  ecr_arn = nanmodm_ecr.repository_arn
+}
