@@ -6,7 +6,7 @@
 ##############################
 # - create fargate_resource
 # - route53 records
-# 
+#
 
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
@@ -84,7 +84,7 @@ module "ecs_nanomdm" {
 
   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}/nanomdm:latest"
   nanomdm_app_port = 9000
-  
+
   # nanomdm_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
   nanomdm_task_definition_cpu = 256
   nanomdm_task_definition_memory = 512
