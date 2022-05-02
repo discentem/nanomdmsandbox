@@ -19,5 +19,5 @@ package
 .vscode/vendor
 .vscode
 
-# bazel
-bazel*
+# python
+__pycache__
