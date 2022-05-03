@@ -11,9 +11,6 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
 module "nanomdm_ecr" {
   source               = "./modules/ecr"
   repository_name      = var.nanomdm_repository_name
@@ -53,6 +50,18 @@ module "ecs_cluster" {
   prefix        = var.prefix
   app_name      = var.app_name
 }
+
+
+module "rds_secret" {
+  source = "./modules/secret"
+
+  name   = "rds"
+
+  aws_region           = var.aws_region
+  account_id           = data.aws_caller_identity.current.account_id
+
+}
+
 
 module "ecs_nanomdm" {
   source = "./modules/ecs_service"
