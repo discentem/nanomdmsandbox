@@ -2,16 +2,21 @@
 
 def run():
     config = {}
-
-    caddy_config = __salt__['pillar.get']("caddy_config", None)
-
     config['manage caddy.json'] = {
-        'file.serialize': [
+        'file.managed': [
             {'name': '/Users/brandon_kurtz/caddy.json'},
-            {'dataset': caddy_config},
-            {'formatter': 'json'},
-            {'makedirs': True}
+            {'source': 'salt://templates/caddy.sls'},
+            {'template': "py"},
+            # inject data into the template
+            {'context': {
+                'email': 'kurtz.brandon@gmail.com',
+                'subjects': ['bkurtz.io'],
+                'hostname_mappings': {
+                    'helloworld.bkurtz.io': 'localhost:8080'
+                }   
+            }}
         ]
     }
+
 
     return config
