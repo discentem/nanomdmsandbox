@@ -1,5 +1,8 @@
 {
-    "files.associations": {
-      "*.sls": "python"
+  "shebang.associations": [
+    {
+        "pattern": "#!py",
+        "language": "python"
     }
-  }
+  ]
+}
