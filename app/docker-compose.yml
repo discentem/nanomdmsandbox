@@ -1,0 +1,34 @@
+version: "3.7"
+
+services:
+  scep:
+    image: scep
+    # image: <my account>.dkr.ecr.<my region>.amazonaws.com/akff-web
+    volumes:
+      - ../config/certs/depot:/service/scep/depot
+    build:
+      context: .
+      dockerfile: ./images/scep/Dockerfile
+      args:
+        - SCEP_VERSION=2.1.0
+        - CHALLENGE=ThisIsAChallenge
+    ports:
+      - "8080:8080"
+
+  nanomdm:
+    container_name: nanomdm
+    image: nanomdm
+    volumes:
+      - ../config/certs/depot/ca.pem:/service/nanomdm/ca.pem
+    build:
+      context: .
+      dockerfile: ./images/nanomdm/Dockerfile
+      args:
+        - NANOMDM_VERSION=0.2.0
+        - API_KEY=nanomdm
+        - CA_FILE_NAME=ca.pem
+    ports:
+      - "9000:9000"
+
+    depends_on:
+      - scep

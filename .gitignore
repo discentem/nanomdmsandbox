@@ -1,5 +1,8 @@
 # Terraform build stuff
+_secrets.auto.tfvars
+_secrets.auto.tfvars.json
 secrets.auto.tfvars
+secrets.auto.tfvars.json
 .terraform
 *.zip
 build
