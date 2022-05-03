@@ -3,13 +3,30 @@
 import json
 from collections import OrderedDict
 
+# salt makes context dict available but context is not defined in this file
+#  so we have to tell pylance to not report undefined variables
+# pyright: reportUndefinedVariable=false
+
 def run():
 
-    # context variables
-    hostname_mappings = context['hostname_mappings'] # type: ignore
-    subjects = context['subjects'] # type: ignore
-    email = context['email'] # type: ignore
+    #### template variables ####
     
+    # ensure template variables are the type that is intended
+    if type(context['hostname_mappings']) is not dict:
+        raise Exception("context['hostname_mappings'] must be dict")
+    if type(context['subjects']) is not list:
+        raise Exception("context['subjects'] must be list")
+    if type(context['email']) is not str:
+        raise Exception("context['email'] must be str")
+
+    # copy template variables to local variables
+    hostname_mappings = context['hostname_mappings']
+    subjects = context['subjects']
+    email = context['email']
+    
+    #### end template variables ####
+
+    # ensure dict order so we don't regenerate the rendered template unnecessarily
     caddy_config = OrderedDict()
     caddy_config = {
         "apps": {
@@ -17,7 +34,7 @@ def run():
                 "automation": {
                     "policies": [
                         {
-                            "subjects": subjects,
+                            "subjects": subjects, # injected template variable
                             "issuers": [
                                 {
                                     "ca": "https://acme-staging-v02.api.letsencrypt.org/directory",
@@ -45,13 +62,14 @@ def run():
                 "servers": {
                     "myServer": {
                         "listen": [":443", ":80"],
-                        "routes": [],
+                        "routes": [], # routes dynamically generated below
                     }
                 }
             },
         }
     }
 
+    # append a handler to routes for each host mapping
     for ext, local in hostname_mappings.items(): # type: ignore
         caddy_config['apps']['http']['servers']['myServer']['routes'].append({
             "match": [{"host": [ext]}],
@@ -73,4 +91,5 @@ def run():
                 }
             ],
         })
+    # return string of final contents
     return json.dumps(caddy_config, indent = 2) 
