@@ -7,7 +7,11 @@ VERSION := $(shell git describe --tags --always)
 
 TERRAFORM_DIR := $(shell pwd)/terraform
 
-CONTAINERS_DIR = images
+APP_DIR := app
+
+CONTAINERS_PREFIX = nanomdm
+CONTAINERS_DIR = $(APP_DIR)/images
+
 CONTAINERS = $(shell find $(CONTAINERS_DIR) -type d -name template -prune -o -mindepth 1 -maxdepth 1 -exec basename {} \;)
 
 .check-args:
@@ -17,9 +21,9 @@ endif
 ifndef AWS_ACCOUNT_ID
 	$(error AWS_ACCOUNT_ID is not set. please use `make {XXX} AWS_ACCOUNT_ID=<1234567890 ...AWS_ACCOUNT_ID>.`)
 endif
-ifndef AWS_PROFILE
-	$(error AWS_PROFILE is not set. please use `make {XXX} AWS_PROFILE=<DEFAULT, ...YOUR_PROFILE_NAME>.`)
-endif
+# ifndef AWS_PROFILE
+# 	$(error AWS_PROFILE is not set. please use `make {XXX} AWS_PROFILE=<DEFAULT, ...YOUR_PROFILE_NAME>.`)
+# endif
 
 # ------------------------------------------------------------------------------
 # Help
@@ -40,11 +44,22 @@ build-containers: .check-args
 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 	@for container in $(CONTAINERS); do \
 		echo "building $$container" ; \
-		docker build -t $(CONTAINERS_PREFIX)-$$container $(CONTAINERS_DIR)/$$container/. ; \
-		docker tag $(CONTAINERS_PREFIX)-$$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)-$$container:$(VERSION) ; \
-		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)-$$container:$(VERSION) ; \
+		docker build -t $$container $(CONTAINERS_DIR)/$$container/. ; \
+		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)/$$container:latest ; \
+		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)/$$container:latest ; \
 	done
 
+.PHONY: build-containers-docker-compose # Build all containers and publish the containers to AWS ECR
+build-containers-docker-compose  : .check-args
+	$(info *** building containers using docker-compose)
+	docker-compose -f ./$(APP_DIR)/docker-compose.yml build
+	$(info *** tagging and uploading containers to AWS ECR)
+	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
+	@for container in $(CONTAINERS); do \
+		echo "tagging $$container" ; \
+		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
+		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
+	done
 
 # terraform deploy
 #

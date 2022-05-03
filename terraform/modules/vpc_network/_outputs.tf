@@ -50,10 +50,10 @@ output "owner_id" {
   value = aws_vpc.vpc.owner_id
 }
 
-output "public_subnets_id" {
+output "public_subnets_ids" {
   value = aws_subnet.public_subnet.*.id
 }
 
-output "private_subnets_id" {
+output "private_subnets_ids" {
   value = aws_subnet.private_subnet.*.id
 }

@@ -1,7 +1,30 @@
-variable "repository_name" {
+variable "aws_region" {
+  type = string
+  description = "AWS region"
+  default = "us-east-1"
+}
+variable "prefix" {
+  type = string
+  description = "Prefix for environment"
+  default = "production"
+}
+
+variable "app_name" {
+  type = string
+  description = "Application name"
+  default = "nanomdm"
+}
+
+variable "scep_repository_name" {
   type        = string
-  description = "ECR Repository Name"
-  default = ""
+  description = "SCEP ECR Repository Name"
+  default = "scep"
+}
+
+variable "nanomdm_repository_name" {
+  type        = string
+  description = "NanoMDM ECR Repository Name"
+  default = "nanomdm"
 }
 
 variable "image_tag_mutability" {
@@ -15,13 +38,6 @@ variable "domain_name" {
     description = "Domain name for the primary Route53 zone record"
     default = "example.com"
 }
-
-variable "aws_region" {
-  type = string
-  description = "AWS region"
-  default = "us-east-1"
-}
-
 
 variable "vpc_cidr" {
   type = string
@@ -41,11 +57,6 @@ variable "private_subnets_cidr" {
 variable "availability_zones" {
   type = list
   description = "VPC AZs"
-}
-variable "prefix" {
-  type = string
-  description = "Prefix for environment"
-  default = "production"
 }
 
 variable "AWS_ACCESS_KEY" {}
