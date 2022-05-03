@@ -42,17 +42,7 @@ jsonencode([
     },
     "environment": "${environment}",
     "memory": "${nanomdm_task_container_memory}",
-    "cpu": "${nanomdm_task_container_cpu}",
-    "secrets": [
-      {
-        "name": "MYSQL_PASSWORD",
-        "valueFrom": "${secrets_manager_database_arn}:MYSQL_PASSWORD::"
-      },
-      {
-        "name": "MYSQL_USER",
-        "valueFrom": "${secrets_manager_database_arn}:MYSQL_USER::"
-      }
-    ]
+    "cpu": "${nanomdm_task_container_cpu}"
   }
 ])
 }

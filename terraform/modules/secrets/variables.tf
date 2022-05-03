@@ -12,3 +12,9 @@ variable "aws_account_id" {
   type        = string
   description = "AWS Account ID"
 }
+
+variable "secret_string" {
+  type        = string
+  description = "secret string for secrets manager resources."
+  sensitive   = true
+}
