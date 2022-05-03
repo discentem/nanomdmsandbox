@@ -11,7 +11,7 @@ module "aurora_mysql" {
   subnets                = var.subnets
   create_security_group  = false
   allowed_cidr_blocks    = var.subnet_cidr_block
-  vpc_security_group_ids = var.security_group_ids
+  vpc_security_group_ids = [aws_security_group.rds.ids]
 
   create_random_password = false
   master_username        = var.username
