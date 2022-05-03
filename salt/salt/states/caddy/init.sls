@@ -5,7 +5,7 @@ def run():
     config['manage caddy.json'] = {
         'file.managed': [
             {'name': '/Users/brandon_kurtz/caddy.json'},
-            {'source': 'salt://templates/caddy.sls'},
+            {'source': 'salt://states/caddy/templates/caddy.sls'},
             {'template': "py"},
             # inject data into the template
             {'context': {

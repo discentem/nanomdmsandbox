@@ -14,7 +14,6 @@ package
 
 # vscode
 .vscode/vendor
-.vscode
 
 # python
 __pycache__
