@@ -5,27 +5,33 @@ locals {
       value = v
     }
   ]
+  nanomdm_task_environment = [
+    for k, v in var.nanomdm_task_container_environment : {
+      name  = k
+      value = v
+    }
+  ]
 }
 
 # data "template_file" "nanomdm_container_definitions" {
 #   template = file("./templates/ecs/nanomdm_template.json.tpl")
 
-#   vars = {
-#     prefix_app_name = local.prefix_app_name
-#     awslogs_group       = aws_cloudwatch_log_group.main.name
-#     aws_region          = data.aws_region.current.name
+  # vars = {
+  #   prefix_app_name = local.prefix_app_name
+  #   awslogs_group       = aws_cloudwatch_log_group.main.name
+  #   aws_region          = data.aws_region.current.name
 
-#     scep_container_image = var.scep_container_image
-#     scep_app_port       = var.scep_app_port
-#     scep_task_container_memory = var.scep_task_definition_memory
-#     scep_task_container_cpu = var.scep_task_definition_cpu
+  #   scep_container_image = var.scep_container_image
+  #   scep_app_port       = var.scep_app_port
+  #   scep_task_container_memory = var.scep_task_definition_memory
+  #   scep_task_container_cpu = var.scep_task_definition_cpu
 
-#     nanomdm_container_image = var.nanomdm_container_image
-#     nanomdm_app_port       = var.nanomdm_app_port
-#     nanomdm_task_container_memory = var.nanomdm_task_definition_memory
-#     nanomdm_task_container_cpu = var.nanomdm_task_definition_cpu
-#     environment         = jsonencode(local.task_environment)
-#   }
+  #   nanomdm_container_image = var.nanomdm_container_image
+  #   nanomdm_app_port       = var.nanomdm_app_port
+  #   nanomdm_task_container_memory = var.nanomdm_task_definition_memory
+  #   nanomdm_task_container_cpu = var.nanomdm_task_definition_cpu
+  #   environment         = jsonencode(local.task_environment)
+  # }
 # }
 
 # templatefile("./templates/nanomdm_template.tftpl", { request_id = "REQ000129834", name = "John" })
@@ -38,24 +44,54 @@ resource "aws_ecs_task_definition" "task" {
   cpu                      = var.default_task_definition_cpu
   memory                   = var.default_task_definition_memory
   task_role_arn            = aws_iam_role.task.arn
-  container_definitions    = templatefile("./templates/nanomdm_template.tftpl", 
-  { prefix_app_name = local.prefix_app_name,
-    awslogs_group       = aws_cloudwatch_log_group.main.name,
-    aws_region          = data.aws_region.current.name,
-    scep_container_image = var.scep_container_image,
-    scep_app_port       = var.scep_app_port,
-    # scep_task_mount_points       = var.scep_task_mount_points,
-    scep_task_container_memory = var.scep_task_definition_memory,
-    scep_task_container_cpu = var.scep_task_definition_cpu,
-    nanomdm_container_image = var.nanomdm_container_image,
-    nanomdm_app_port       = var.nanomdm_app_port,
-    # nanomdm_task_mount_points       = var.nanomdm_task_mount_points,
-    nanomdm_task_container_memory = var.nanomdm_task_definition_memory,
-    nanomdm_task_container_cpu = var.nanomdm_task_definition_cpu,
-    environment         = local.task_environment}
-  )
-  # data.template_file.nanomdm_container_definitions.rendered
-
+  container_definitions = <<EOF
+  [
+    {
+      "name": "${var.app_name}-nanomdm",
+      "image": "${var.nanomdm_container_image}",
+      "memory": ${var.nanomdm_task_definition_cpu},
+      "cpu": ${var.nanomdm_task_definition_memory},
+      "links": [],
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": ${var.nanomdm_app_port},
+          "hostPort": ${var.nanomdm_app_port},
+          "protocol": "tcp"
+        }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+        "awslogs-region": "${data.aws_region.current.name}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  },
+  {
+    "name": "${var.app_name}-scep",
+    "image": "${var.scep_container_image}",
+    "portMappings": [
+        {
+          "containerPort": ${var.scep_app_port},
+          "hostPort": ${var.scep_app_port},
+          "protocol": "tcp"
+        }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+        "awslogs-region": "${data.aws_region.current.name}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    },
+    "memory": ${var.scep_task_definition_memory},
+    "cpu": ${var.scep_task_definition_cpu}
+  }
+]
+EOF
   dynamic "ephemeral_storage" {
     for_each = var.default_task_definition_ephemeral_storage == 0 ? [] : [var.default_task_definition_ephemeral_storage]
     content {

@@ -79,6 +79,11 @@ variable "nanomdm_task_definition_memory" {
   type        = number
 }
 
+variable "nanomdm_task_container_environment" {
+  description = "The environment variables to pass to a container."
+  default     = {}
+  type        = map(string)
+}
 
 variable "default_task_definition_cpu" {
   description = "Amount of CPU to reserve for the task."

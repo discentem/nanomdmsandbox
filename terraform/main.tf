@@ -65,7 +65,6 @@ module "rds" {
   allowed_cidr_blocks = module.vpc.database_subnets_cidr_blocks
 }
 
-
 module "rds_secret" {
   source = "./modules/secrets"
 
@@ -77,57 +76,61 @@ module "rds_secret" {
   secret_string        = jsonencode({ USERNAME = module.rds.mysql_cluster_master_username, PASSWORD = module.rds.mysql_cluster_master_password})
 }
 
-# module "ecs_nanomdm" {
-#   source = "./modules/ecs_service"
+module "ecs_nanomdm" {
+  source = "./modules/ecs_service"
 
-#   prefix   = var.prefix
-#   app_name = var.app_name
+  prefix   = var.prefix
+  app_name = var.app_name
 
-#   vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc.vpc_id
 
-#   cluster_id = module.ecs_cluster.cluster_id
+  cluster_id = module.ecs_cluster.cluster_id
 
-#   private_subnet_ids = module.vpc.vpc_id
-#   public_subnet_ids  = module.vpc.public_subnets
+  private_subnet_ids = module.vpc.private_subnets
+  public_subnet_ids  = module.vpc.public_subnets
 
-#   scep_container_image = "${module.scep_ecr.repository_url}/scep:latest"
-#   scep_app_port        = 8080
+  scep_container_image = "${module.scep_ecr.repository_url}/scep:latest"
+  scep_app_port        = 8080
 
-#   # scep_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
-#   scep_task_definition_cpu    = 256
-#   scep_task_definition_memory = 512
+  # scep_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
+  scep_task_definition_cpu    = 256
+  scep_task_definition_memory = 512
 
-#   scep_health_check = {
-#     port                = "traffic-port"
-#     path                = "/"
-#     health_threshold    = "3"
-#     interval            = "30"
-#     protocol            = "HTTP"
-#     matcher             = "200"
-#     timeout             = "3"
-#     unhealthy_threshold = "2"
-#   }
+  scep_health_check = {
+    port                = "traffic-port"
+    path                = "/"
+    health_threshold    = "3"
+    interval            = "30"
+    protocol            = "HTTP"
+    matcher             = "200"
+    timeout             = "3"
+    unhealthy_threshold = "2"
+  }
 
-#   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}/nanomdm:latest"
-#   nanomdm_app_port        = 9000
+  nanomdm_container_image = "${module.nanomdm_ecr.repository_url}/nanomdm:latest"
+  nanomdm_app_port        = 9000
+  nanomdm_task_container_environment = {
+    MYSQL_HOSTNAME = module.rds.mysql_cluster_master_username
+    MYSQL_USERNAME = module.rds.mysql_cluster_endpoint
+  }
 
-#   # nanomdm_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
-#   nanomdm_task_definition_cpu    = 256
-#   nanomdm_task_definition_memory = 512
-#   nanomdm_health_check = {
-#     port                = "traffic-port"
-#     path                = "/"
-#     health_threshold    = "3"
-#     interval            = "30"
-#     protocol            = "HTTP"
-#     matcher             = "200"
-#     timeout             = "3"
-#     unhealthy_threshold = "2"
-#   }
+  # nanomdm_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
+  nanomdm_task_definition_cpu    = 256
+  nanomdm_task_definition_memory = 512
+  nanomdm_health_check = {
+    port                = "traffic-port"
+    path                = "/"
+    health_threshold    = "3"
+    interval            = "30"
+    protocol            = "HTTP"
+    matcher             = "200"
+    timeout             = "3"
+    unhealthy_threshold = "2"
+  }
 
-#   depends_on = [module.push_docker_images]
+  depends_on = [module.push_docker_images]
 
-# }
+}
 
 module "push_docker_images" {
   source     = "./modules/push_images"
