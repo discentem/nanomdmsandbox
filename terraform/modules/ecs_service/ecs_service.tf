@@ -41,16 +41,16 @@ resource "aws_ecs_task_definition" "task" {
   execution_role_arn       = aws_iam_role.execution.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = var.default_task_definition_cpu
-  memory                   = var.default_task_definition_memory
+  cpu                      = var.container_definition_cpu
+  memory                   = var.container_definition_memory
   task_role_arn            = aws_iam_role.task.arn
   container_definitions = <<EOF
   [
     {
       "name": "${var.app_name}-nanomdm",
       "image": "${var.nanomdm_container_image}",
-      "memory": ${var.nanomdm_task_definition_cpu},
-      "cpu": ${var.nanomdm_task_definition_memory},
+      "memory": ${var.nanomdm_task_definition_memory},
+      "cpu": ${var.nanomdm_task_definition_cpu},
       "links": [],
       "essential": true,
       "portMappings": [
@@ -193,13 +193,25 @@ resource "aws_ecs_service" "service" {
     }
   }
 
-  dynamic "load_balancer" {
-    for_each = var.is_load_balanced ? var.target_groups : []
-    content {
-      container_name   = var.container_name != "" ? var.container_name : var.prefix
-      container_port   = lookup(load_balancer.value, "container_port", var.task_container_port)
-      target_group_arn = aws_lb_target_group.task[lookup(load_balancer.value, "target_group_name")].arn
-    }
+  # dynamic "load_balancer" {
+  #   for_each = var.is_load_balanced ? var.target_groups : []
+  #   content {
+  #     container_name   = var.container_name != "" ? var.container_name : var.prefix
+  #     container_port   = lookup(load_balancer.value, "container_port", var.task_container_port)
+  #     target_group_arn = aws_lb_target_group.task[lookup(load_balancer.value, "target_group_name")].arn
+  #   }
+  # }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.nanomdm.arn
+    container_name   = "${var.app_name}-nanomdm"
+    container_port   = var.nanomdm_app_port
+  }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.scep.arn
+    container_name   = "${var.app_name}-scep"
+    container_port   = var.scep_app_port
   }
 
   deployment_controller {

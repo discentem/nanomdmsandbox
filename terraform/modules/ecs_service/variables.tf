@@ -33,6 +33,18 @@ variable "platform_version" {
   default     = "LATEST"
 }
 
+variable "container_definition_cpu" {
+  description = "Amount of CPU to reserve for the task."
+  default     = null
+  type        = number
+}
+
+variable "container_definition_memory" {
+  description = "The soft limit (in MiB) of memory to reserve for the task."
+  default     = null
+  type        = number
+}
+
 variable "scep_container_image" {
   description = "The SCEP image used to start a container."
   type        = string
@@ -46,7 +58,7 @@ variable "scep_app_port" {
 
 variable "scep_task_definition_cpu" {
   description = "Amount of CPU to reserve for the task."
-  default     = 256
+  default     = 512
   type        = number
 }
 
@@ -87,13 +99,13 @@ variable "nanomdm_task_container_environment" {
 
 variable "default_task_definition_cpu" {
   description = "Amount of CPU to reserve for the task."
-  default     = 512
+  default     = 256
   type        = number
 }
 
 variable "default_task_definition_memory" {
   description = "The soft limit (in MiB) of memory to reserve for the task."
-  default     = 1024
+  default     = 512
   type        = number
 }
 
@@ -266,18 +278,6 @@ variable "task_health_check" {
   type        = map(number)
   description = "An optional healthcheck definition for the task"
   default     = null
-}
-
-variable "task_container_cpu" {
-  description = "Amount of CPU to reserve for the container."
-  default     = null
-  type        = number
-}
-
-variable "task_container_memory" {
-  description = "The hard limit (in MiB) of memory for the container."
-  default     = null
-  type        = number
 }
 
 variable "task_container_memory_reservation" {

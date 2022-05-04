@@ -89,12 +89,15 @@ module "ecs_nanomdm" {
   private_subnet_ids = module.vpc.private_subnets
   public_subnet_ids  = module.vpc.public_subnets
 
+  container_definition_cpu = 256
+  container_definition_memory = 512
+
   scep_container_image = "${module.scep_ecr.repository_url}/scep:latest"
   scep_app_port        = 8080
 
   # scep_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
-  scep_task_definition_cpu    = 256
-  scep_task_definition_memory = 512
+  scep_task_definition_cpu    = 128
+  scep_task_definition_memory = 256
 
   scep_health_check = {
     port                = "traffic-port"
@@ -115,8 +118,8 @@ module "ecs_nanomdm" {
   }
 
   # nanomdm_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
-  nanomdm_task_definition_cpu    = 256
-  nanomdm_task_definition_memory = 512
+  nanomdm_task_definition_cpu    = 128
+  nanomdm_task_definition_memory = 256
   nanomdm_health_check = {
     port                = "traffic-port"
     path                = "/"
