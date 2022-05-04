@@ -4,5 +4,8 @@
         "pattern": "#!py",
         "language": "python"
     }
-  ]
+  ],
+  "files.associations": {
+    "*.sls": "yaml"
+  }
 }

@@ -3,28 +3,34 @@
 import json
 from collections import OrderedDict
 
-# salt makes context dict available but context is not defined in this file
-#  so we have to tell pylance to not report undefined variables
+# salt makes template_variables dict available but template_variables is not defined in this file
+#  so we have to tell pylance to not report undefined template_variables
 # pyright: reportUndefinedVariable=false
 
 def run():
 
-    #### template variables ####
+    #### template template_variables ####
     
-    # ensure template variables are the type that is intended
-    if type(context['hostname_mappings']) is not dict:
-        raise Exception("context['hostname_mappings'] must be dict")
-    if type(context['subjects']) is not list:
-        raise Exception("context['subjects'] must be list")
-    if type(context['email']) is not str:
-        raise Exception("context['email'] must be str")
+    # ensure template template_variables are the type that is intended
+    if type(template_variables['subjects']) is not list:
+        raise Exception("template_variables['subjects'] must be list")
+    if type(template_variables['email']) is not str:
+        raise Exception("template_variables['email'] must be str")
 
-    # copy template variables to local variables
-    hostname_mappings = context['hostname_mappings']
-    subjects = context['subjects']
-    email = context['email']
+    try:
+        # Force hostname_mappings into collections.OrderedDict instead of <class 'salt.utils.odict.OrderedDict'>
+        # hostname_mappings will be salt.utils.odict.OrderedDict if ../init.sls is using the default renderer
+        # https://docs.saltproject.io/en/latest/ref/renderers/all/salt.renderers.yaml.html.
+        # It is not clear how type check salt.util.odict.OrderedDict so we do this instead.
+        hostname_mappings = OrderedDict(template_variables['hostname_mappings'])
+    except Exception as e:
+        raise e
+
+    # copy template template_variables to local template_variables
+    subjects = template_variables['subjects']
+    email = template_variables['email']
     
-    #### end template variables ####
+    #### end template template_variables ####
 
     # ensure dict order so we don't regenerate the rendered template unnecessarily
     caddy_config = OrderedDict()
