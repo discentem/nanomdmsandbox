@@ -5,7 +5,7 @@ services:
     image: scep
     # image: <my account>.dkr.ecr.<my region>.amazonaws.com/akff-web
     volumes:
-      - ../config/certs/depot:/service/scep/depot
+      - ./config/certs/depot:/service/scep/depot
     build:
       context: .
       dockerfile: ./images/scep/Dockerfile
