@@ -36,7 +36,6 @@ variable "image_tag_mutability" {
 variable "domain_name" {
     type = string
     description = "Domain name for the primary Route53 zone record"
-    default = "example.com"
 }
 
 variable "vpc_cidr" {
