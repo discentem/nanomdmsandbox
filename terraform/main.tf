@@ -92,7 +92,7 @@ module "ecs_nanomdm" {
   container_definition_cpu = 256
   container_definition_memory = 512
 
-  scep_container_image = "${module.scep_ecr.repository_url}/scep:latest"
+  scep_container_image = "${module.scep_ecr.repository_url}:latest"
   scep_app_port        = 8080
 
   # scep_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
@@ -110,7 +110,7 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
-  nanomdm_container_image = "${module.nanomdm_ecr.repository_url}/nanomdm:latest"
+  nanomdm_container_image = "${module.nanomdm_ecr.repository_url}:latest"
   nanomdm_app_port        = 9000
   nanomdm_task_container_environment = {
     MYSQL_HOSTNAME = module.rds.mysql_cluster_master_username

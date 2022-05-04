@@ -57,7 +57,7 @@ build-containers-docker-compose  : .check-args
 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 	@for container in $(CONTAINERS); do \
 		echo "tagging $$container" ; \
-		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
+		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \	
 		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
 	done
 

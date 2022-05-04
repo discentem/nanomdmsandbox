@@ -5,8 +5,8 @@ RUN apk update \
 
 ARG NANOMDM_VERSION
 ENV NANOMDM_VERSION $NANOMDM_VERSION
-ARG CA_FILE_NAME
-ENV CA_FILE_NAME $CA_FILE_NAME
+# ARG CA_FILE_NAME
+# ENV CA_FILE_NAME $CA_FILE_NAME
 ARG API_KEY
 ENV API_KEY $API_KEY
 
@@ -26,11 +26,15 @@ RUN unzip nanomdm-linux-amd64-v$NANOMDM_VERSION.zip
 RUN chmod a+x ./nanomdm-linux-amd64
 
 ENV MYSQL_DSN $MYSQL_DSN
-RUN export MYSQL_DSN=$(aws rds generate-db-auth-token \
-   --hostname ${MYSQL_HOSTNAME} \
-   --port 3306 \
-   --region us-east-1 \
-   --username ${MYSQL_USERNAME} --output text)
+
+RUN export MYSQL_DSN=""
+
+# RUN export MYSQL_DSN=$(aws rds generate-db-auth-token \
+#    --hostname ${MYSQL_HOSTNAME} \
+#    --port 3306 \
+#    --region us-east-1 \
+#    --username ${MYSQL_USERNAME} --output text)
 
 EXPOSE 9000
-CMD ./nanomdm-linux-amd64 -ca $CA_FILE_NAME -api $API_KEY -storage mysql -dsn $MYSQL_DSN
+# ./nanomdm-darwin-amd64 -ca ca.pem -api nanomdm -debug
+CMD ./nanomdm-linux-amd64 -debug -ca ca.pem -api $API_KEY -storage mysql -dsn "${MYSQL_DSN}"

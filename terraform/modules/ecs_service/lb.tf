@@ -1,6 +1,7 @@
 resource "aws_alb" "lb" {
   name            = local.prefix_app_name
   subnets         = var.public_subnet_ids
+  load_balancer_type = "application"
   security_groups = [aws_security_group.lb.id]
 }
 
