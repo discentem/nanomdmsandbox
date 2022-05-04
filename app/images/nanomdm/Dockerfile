@@ -26,7 +26,6 @@ RUN unzip nanomdm-linux-amd64-v$NANOMDM_VERSION.zip
 RUN chmod a+x ./nanomdm-linux-amd64
 
 ENV MYSQL_DSN $MYSQL_DSN
-
 RUN export MYSQL_DSN=""
 
 # RUN export MYSQL_DSN=$(aws rds generate-db-auth-token \
