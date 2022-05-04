@@ -36,6 +36,85 @@ locals {
 
 # templatefile("./templates/nanomdm_template.tftpl", { request_id = "REQ000129834", name = "John" })
 
+
+
+module "nanomdm" {
+  source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-nanomdm"
+
+  image     = "${var.nanomdm_container_image}"
+  essential = true
+
+  portMappings = [
+    {
+      containerPort =  var.nanomdm_app_port
+      hostPort = var.nanomdm_app_port
+      protocol = "tcp"
+    },
+  ]
+
+  environment = local.nanomdm_task_environment
+
+  memory = var.nanomdm_task_definition_memory
+  cpu    = var.nanomdm_task_definition_cpu
+
+  register_task_definition = false
+}
+
+module "scep" {
+ source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-scep"
+
+  image     = "${var.scep_container_image}"
+  essential = true
+
+  portMappings = [
+    {
+      containerPort =  var.scep_app_port
+      hostPort = var.scep_app_port
+      protocol = "tcp"
+    },
+  ]
+
+  environment = local.task_environment
+
+  memory = var.scep_task_definition_memory
+  cpu    = var.scep_task_definition_cpu
+
+  register_task_definition = false
+}
+
+
+# module "mysql" {
+#   source = "mongodb/ecs-task-definition/aws"
+
+#   environment = [
+#     {
+#       name  = "MYSQL_ROOT_PASSWORD"
+#       value = "password"
+#     },
+#   ]
+
+#   name      = "mysql"
+#   image     = "mysql"
+#   cpu       = 10
+#   memory    = 500
+#   essential = true
+
+#   register_task_definition = false
+# }
+
+module "merged" {
+ source = "../../modules/ecs_task_definition//modules/merge"
+
+ container_definitions = [
+   "${module.nanomdm.container_definitions}",
+   "${module.scep.container_definitions}",
+ ]
+}
+
 resource "aws_ecs_task_definition" "task" {
   family                   = local.prefix_app_name
   execution_role_arn       = aws_iam_role.execution.arn
@@ -44,54 +123,56 @@ resource "aws_ecs_task_definition" "task" {
   cpu                      = var.container_definition_cpu
   memory                   = var.container_definition_memory
   task_role_arn            = aws_iam_role.task.arn
-  container_definitions = <<EOF
-  [
-    {
-      "name": "${var.app_name}-nanomdm",
-      "image": "${var.nanomdm_container_image}",
-      "memory": ${var.nanomdm_task_definition_memory},
-      "cpu": ${var.nanomdm_task_definition_cpu},
-      "links": [],
-      "essential": true,
-      "portMappings": [
-        {
-          "containerPort": ${var.nanomdm_app_port},
-          "hostPort": ${var.nanomdm_app_port},
-          "protocol": "tcp"
-        }
-    ],
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
-        "awslogs-region": "${data.aws_region.current.name}",
-        "awslogs-stream-prefix": "ecs"
-      }
-    }
-  },
-  {
-    "name": "${var.app_name}-scep",
-    "image": "${var.scep_container_image}",
-    "portMappings": [
-        {
-          "containerPort": ${var.scep_app_port},
-          "hostPort": ${var.scep_app_port},
-          "protocol": "tcp"
-        }
-    ],
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
-        "awslogs-region": "${data.aws_region.current.name}",
-        "awslogs-stream-prefix": "ecs"
-      }
-    },
-    "memory": ${var.scep_task_definition_memory},
-    "cpu": ${var.scep_task_definition_cpu}
-  }
-]
-EOF
+  container_definitions    = "${module.merged.container_definitions}"
+#   container_definitions = <<EOF
+#   [
+#     {
+#       "name": "${var.app_name}-nanomdm",
+#       "image": "${var.nanomdm_container_image}",
+#       "memory": ${var.nanomdm_task_definition_memory},
+#       "cpu": ${var.nanomdm_task_definition_cpu},
+#       "environment": ${local.nanomdm_task_environment},
+#       "links": [],
+#       "essential": true,
+#       "portMappings": [
+#         {
+#           "containerPort": ${var.nanomdm_app_port},
+#           "hostPort": ${var.nanomdm_app_port},
+#           "protocol": "tcp"
+#         }
+#     ],
+#     "logConfiguration": {
+#       "logDriver": "awslogs",
+#       "options": {
+#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+#         "awslogs-region": "${data.aws_region.current.name}",
+#         "awslogs-stream-prefix": "ecs"
+#       }
+#     }
+#   },
+#   {
+#     "name": "${var.app_name}-scep",
+#     "image": "${var.scep_container_image}",
+#     "portMappings": [
+#         {
+#           "containerPort": ${var.scep_app_port},
+#           "hostPort": ${var.scep_app_port},
+#           "protocol": "tcp"
+#         }
+#     ],
+#     "logConfiguration": {
+#       "logDriver": "awslogs",
+#       "options": {
+#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+#         "awslogs-region": "${data.aws_region.current.name}",
+#         "awslogs-stream-prefix": "ecs"
+#       }
+#     },
+#     "memory": ${var.scep_task_definition_memory},
+#     "cpu": ${var.scep_task_definition_cpu}
+#   }
+# ]
+# EOF
   dynamic "ephemeral_storage" {
     for_each = var.default_task_definition_ephemeral_storage == 0 ? [] : [var.default_task_definition_ephemeral_storage]
     content {

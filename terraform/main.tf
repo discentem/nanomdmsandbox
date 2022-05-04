@@ -113,8 +113,8 @@ module "ecs_nanomdm" {
   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}:latest"
   nanomdm_app_port        = 9000
   nanomdm_task_container_environment = {
-    MYSQL_HOSTNAME = module.rds.mysql_cluster_master_username
-    MYSQL_USERNAME = module.rds.mysql_cluster_endpoint
+    MYSQL_HOSTNAME = module.rds.mysql_cluster_endpoint
+    MYSQL_USERNAME = module.rds.mysql_cluster_master_username
   }
 
   # nanomdm_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
