@@ -1,7 +1,9 @@
 #!py
 
 import json
-from collections import OrderedDict
+# salt magically makes salt.utils.dict available
+#  so we have to tell pylance to not report missingImports
+from salt.utils.odict import OrderedDict # pyright: reportMissingImports=false
 
 # salt makes template_variables dict available but template_variables is not defined in this file
 #  so we have to tell pylance to not report undefined template_variables
@@ -17,14 +19,14 @@ def run():
     if type(template_variables['email']) is not str:
         raise Exception("template_variables['email'] must be str")
 
-    try:
-        # Force hostname_mappings into collections.OrderedDict instead of <class 'salt.utils.odict.OrderedDict'>
-        # hostname_mappings will be salt.utils.odict.OrderedDict if ../init.sls is using the default renderer
-        # https://docs.saltproject.io/en/latest/ref/renderers/all/salt.renderers.yaml.html.
-        # It is not clear how type check salt.util.odict.OrderedDict so we do this instead.
-        hostname_mappings = OrderedDict(template_variables['hostname_mappings'])
-    except Exception as e:
-        raise e
+
+    hostname_mappings = template_variables['hostname_mappings']
+    # hostname_mappings will be salt.utils.odict.OrderedDict if ../init.sls is using the default renderer
+    #  https://docs.saltproject.io/en/latest/ref/renderers/all/salt.renderers.yaml.html.
+    if isinstance(hostname_mappings, OrderedDict) or isinstance(hostname_mappings, dict):
+        pass
+    else:
+        raise Exception("template_variables['hostname_mappings'] must be OrderedDict or dict")
 
     # copy template template_variables to local template_variables
     subjects = template_variables['subjects']
