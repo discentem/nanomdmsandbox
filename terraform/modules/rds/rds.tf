@@ -15,6 +15,8 @@ module "aurora_mysql" {
   apply_immediately   = true
   skip_final_snapshot = true
 
+  # iam_database_authentication_enabled = true
+
   vpc_id                 = var.vpc_id
   allowed_cidr_blocks    = var.allowed_cidr_blocks
   # allowed_security_groups = var.allowed_security_groups
