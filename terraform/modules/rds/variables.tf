@@ -22,3 +22,8 @@ variable "allowed_cidr_blocks" {
   description = "A list of subnets of allowed subnets that can reach the RDS instances"
   type        = list(string)
 }
+
+# variable "allowed_security_groups" {
+#   description = "A list of allowed security groups that can reach the RDS instances"
+#   type        = list(string)
+# }

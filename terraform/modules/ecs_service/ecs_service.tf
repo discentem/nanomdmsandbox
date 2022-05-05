@@ -13,31 +13,6 @@ locals {
   ]
 }
 
-# data "template_file" "nanomdm_container_definitions" {
-#   template = file("./templates/ecs/nanomdm_template.json.tpl")
-
-  # vars = {
-  #   prefix_app_name = local.prefix_app_name
-  #   awslogs_group       = aws_cloudwatch_log_group.main.name
-  #   aws_region          = data.aws_region.current.name
-
-  #   scep_container_image = var.scep_container_image
-  #   scep_app_port       = var.scep_app_port
-  #   scep_task_container_memory = var.scep_task_definition_memory
-  #   scep_task_container_cpu = var.scep_task_definition_cpu
-
-  #   nanomdm_container_image = var.nanomdm_container_image
-  #   nanomdm_app_port       = var.nanomdm_app_port
-  #   nanomdm_task_container_memory = var.nanomdm_task_definition_memory
-  #   nanomdm_task_container_cpu = var.nanomdm_task_definition_cpu
-  #   environment         = jsonencode(local.task_environment)
-  # }
-# }
-
-# templatefile("./templates/nanomdm_template.tftpl", { request_id = "REQ000129834", name = "John" })
-
-
-
 module "nanomdm" {
   source = "../../modules/ecs_task_definition"
 
@@ -53,6 +28,24 @@ module "nanomdm" {
       protocol = "tcp"
     },
   ]
+
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+#     "logConfiguration": {
+#       "logDriver": "awslogs",
+#       "options": {
+#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+#         "awslogs-region": "${data.aws_region.current.name}",
+#         "awslogs-stream-prefix": "ecs"
+#       }
+#     },
 
   environment = local.nanomdm_task_environment
 
@@ -78,6 +71,15 @@ module "scep" {
     },
   ]
 
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
   environment = local.task_environment
 
   memory = var.scep_task_definition_memory
@@ -86,25 +88,6 @@ module "scep" {
   register_task_definition = false
 }
 
-
-# module "mysql" {
-#   source = "mongodb/ecs-task-definition/aws"
-
-#   environment = [
-#     {
-#       name  = "MYSQL_ROOT_PASSWORD"
-#       value = "password"
-#     },
-#   ]
-
-#   name      = "mysql"
-#   image     = "mysql"
-#   cpu       = 10
-#   memory    = 500
-#   essential = true
-
-#   register_task_definition = false
-# }
 
 module "merged" {
  source = "../../modules/ecs_task_definition//modules/merge"

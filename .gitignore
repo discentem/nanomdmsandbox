@@ -20,3 +20,4 @@ package
 
 # python
 __pycache__
+*.info

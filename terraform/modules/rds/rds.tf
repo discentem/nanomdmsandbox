@@ -17,6 +17,7 @@ module "aurora_mysql" {
 
   vpc_id                 = var.vpc_id
   allowed_cidr_blocks    = var.allowed_cidr_blocks
+  # allowed_security_groups = var.allowed_security_groups
 
   create_random_password = true
 

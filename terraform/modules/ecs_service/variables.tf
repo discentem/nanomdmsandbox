@@ -333,3 +333,27 @@ variable "enable_execute_command" {
   description = "Specifies whether to enable Amazon ECS Exec for the tasks within the service."
   default     = true
 }
+
+
+variable "zone_id" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "domain_name" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "lb_subdomain_name" {
+  type        = string
+  description = ""
+  default     = "nanomdm-infra"
+}
+
+variable "certificate_arn" {
+  type        = string
+  description = ""
+}
