@@ -1,9 +1,23 @@
 ## Run Salt
 
-From the root of `nanomdmsandbox`
+## Linux 
+
+### Sync files
+
+```
+rsync -e "ssh -i ~/.ssh/do" -r ~/nanomdmsandbox/salt/* root@SERVER_IP:/srv
+```
 
 ```shell
-sudo salt-call --local state.apply --file-root salt/salt --pillar-root salt/pillar --log-level trace -c ${PWD}/salt
+sudo salt-call --local state.apply
+```
+
+## macOS
+
+From root of this project:
+
+```shell
+sudo salt-call --local state.apply --file-root salt/salt --pillar-root salt/pillar --log-level info -c ${PWD}/salt
 ```
 
 # Micromdm architecture
