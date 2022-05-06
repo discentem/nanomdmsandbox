@@ -58,5 +58,17 @@ variable "availability_zones" {
   description = "VPC AZs"
 }
 
+variable "public_inbound_cidr_blocks_ipv4" {
+  type = list(string)
+  description = "list of allowed CIDRs to reach public resources"
+  # default = ["0.0.0.0/0"]
+}
+
+variable "public_inbound_cidr_blocks_ipv6" {
+  type = list(string)
+  description = "list of allowed CIDRs to reach public resources"
+  # default = ["::/0"]
+}
+
 variable "AWS_ACCESS_KEY" {}
 variable "AWS_SECRET_KEY" {}

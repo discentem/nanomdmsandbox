@@ -42,6 +42,8 @@ module "rds_mysql" {
 
   create_random_password = local.create_random_password
 
+  password             = local.password
+
   # Enhanced Monitoring - see example for details on how to create the role
   # by yourself, in case you don't want to create it automatically
   monitoring_interval = "30"

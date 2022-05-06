@@ -9,6 +9,24 @@ module "security_group" {
   ingress_cidr_blocks      = var.allowed_cidr_blocks
   ingress_rules            = ["mysql-tcp"]
 
+#   egress_with_cidr_blocks = [
+#     {
+#       from_port         = 0
+#       to_port           = 0
+#       protocol          = "-1"
+#       cidr_blocks = "0.0.0.0/0"
+#     }
+#   ]
+
+#   computed_ingress_with_source_security_group_id = [
+#     {
+#       rule                     = "mysql-tcp"
+#       source_security_group_id = var.ecs_service_security_group_id
+#     }
+#   ]
+
+#   number_of_computed_ingress_with_source_security_group_id = 1
+
   # ingress
 #   ingress_with_cidr_blocks = [
 #     {

@@ -165,6 +165,12 @@ variable "port" {
 #   default     = []
 # }
 
+# variable "ecs_service_security_group_id" {
+#   description = ""
+#   type        = string
+#   default     = null
+# }
+
 variable "availability_zone" {
   description = "The Availability Zone of the RDS instance"
   type        = string

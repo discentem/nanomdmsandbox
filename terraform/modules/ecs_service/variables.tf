@@ -362,3 +362,13 @@ variable "mysql_secrets_manager_arn" {
   type        = string
   description = ""
 }
+
+variable "public_inbound_cidr_blocks_ipv4" {
+  type = list(string)
+  description = "list of allowed CIDRs to reach public resources"
+}
+
+variable "public_inbound_cidr_blocks_ipv6" {
+  type = list(string)
+  description = "list of allowed CIDRs to reach public resources"
+}

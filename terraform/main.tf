@@ -175,6 +175,9 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
+  public_inbound_cidr_blocks_ipv4 = var.public_inbound_cidr_blocks_ipv4
+  public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
+
   depends_on = [module.push_docker_images]
 
 }
