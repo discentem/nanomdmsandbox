@@ -3,8 +3,6 @@
 def run():
     config = {}
 
-    print("caddy.path", __salt__['pillar.get']("caddy.path"))
-
     config['manage caddy.json'] = {
         'file.managed': [
             {'name': __salt__['pillar.get']("caddy")["path"]},
