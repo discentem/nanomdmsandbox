@@ -1,113 +1,126 @@
-################################################################################
-# RDS Aurora Module - MySQL
-################################################################################
-
-# aws_db_subnet_group
-output "mysql_db_subnet_group_name" {
-  description = "The db subnet group name"
-  value       = module.aurora_mysql.db_subnet_group_name
+output "enhanced_monitoring_iam_role_name" {
+  description = "The name of the monitoring role"
+  value       = module.rds_mysql.enhanced_monitoring_iam_role_name
 }
 
-# aws_rds_cluster
-output "mysql_cluster_arn" {
-  description = "Amazon Resource Name (ARN) of cluster"
-  value       = module.aurora_mysql.cluster_arn
+output "enhanced_monitoring_iam_role_arn" {
+  description = "The Amazon Resource Name (ARN) specifying the monitoring role"
+  value       = module.rds_mysql.enhanced_monitoring_iam_role_arn
 }
 
-output "mysql_cluster_id" {
-  description = "The RDS Cluster Identifier"
-  value       = module.aurora_mysql.cluster_id
+output "db_instance_address" {
+  description = "The address of the RDS instance"
+  value       = module.rds_mysql.db_instance_address
 }
 
-output "mysql_cluster_resource_id" {
-  description = "The RDS Cluster Resource ID"
-  value       = module.aurora_mysql.cluster_resource_id
+output "db_instance_arn" {
+  description = "The ARN of the RDS instance"
+  value       = module.rds_mysql.db_instance_arn
 }
 
-output "mysql_cluster_members" {
-  description = "List of RDS Instances that are a part of this cluster"
-  value       = module.aurora_mysql.cluster_members
+output "db_instance_availability_zone" {
+  description = "The availability zone of the RDS instance"
+  value       = module.rds_mysql.db_instance_availability_zone
 }
 
-output "mysql_cluster_endpoint" {
-  description = "Writer endpoint for the cluster"
-  value       = module.aurora_mysql.cluster_endpoint
+output "db_instance_endpoint" {
+  description = "The connection endpoint"
+  value       = module.rds_mysql.db_instance_endpoint
 }
 
-output "mysql_cluster_reader_endpoint" {
-  description = "A read-only endpoint for the cluster, automatically load-balanced across replicas"
-  value       = module.aurora_mysql.cluster_reader_endpoint
+output "db_instance_hosted_zone_id" {
+  description = "The canonical hosted zone ID of the DB instance (to be used in a Route 53 Alias record)"
+  value       = module.rds_mysql.db_instance_hosted_zone_id
 }
 
-output "mysql_cluster_engine_version_actual" {
-  description = "The running version of the cluster database"
-  value       = module.aurora_mysql.cluster_engine_version_actual
+output "db_instance_id" {
+  description = "The RDS instance ID"
+  value       = module.rds_mysql.db_instance_id
 }
 
-# database_name is not set on `aws_rds_cluster` resource if it was not specified, so can't be used in output
-output "mysql_cluster_database_name" {
-  description = "Name for an automatically created database on cluster creation"
-  value       = module.aurora_mysql.cluster_database_name
+output "db_instance_resource_id" {
+  description = "The RDS Resource ID of this instance"
+  value       = module.rds_mysql.db_instance_resource_id
 }
 
-output "mysql_cluster_port" {
+output "db_instance_status" {
+  description = "The RDS instance status"
+  value       = module.rds_mysql.db_instance_status
+}
+
+output "db_instance_name" {
+  description = "The database name"
+  value       = module.rds_mysql.db_instance_name
+}
+
+output "db_instance_username" {
+  description = "The master username for the database"
+  value       = module.rds_mysql.db_instance_username
+  sensitive   = true
+}
+
+output "db_instance_password" {
+  description = "The database password (this password may be old, because Terraform doesn't track it after initial creation)"
+  value       = local.password
+  sensitive   = true
+}
+
+output "db_instance_domain" {
+  description = "The ID of the Directory Service Active Directory domain the instance is joined to"
+  value       = module.rds_mysql.db_instance_domain
+}
+
+output "db_instance_domain_iam_role_name" {
+  description = "The name of the IAM role to be used when making API calls to the Directory Service. "
+  value       = module.rds_mysql.db_instance_domain_iam_role_name
+}
+
+output "db_instance_port" {
   description = "The database port"
-  value       = module.aurora_mysql.cluster_port
+  value       = module.rds_mysql.db_instance_port
 }
 
-output "mysql_cluster_master_password" {
-  description = "The database master password"
-  value       = module.aurora_mysql.cluster_master_password
-  sensitive   = true
+output "db_instance_ca_cert_identifier" {
+  description = "Specifies the identifier of the CA certificate for the DB instance"
+  value       = module.rds_mysql.db_instance_ca_cert_identifier
 }
 
-output "mysql_cluster_master_username" {
-  description = "The database master username"
-  value       = module.aurora_mysql.cluster_master_username
-  sensitive   = true
-}
+# output "db_subnet_group_id" {
+#   description = "The db subnet group name"
+#   value       = module.db_subnet_group.db_subnet_group_id
+# }
 
-output "mysql_cluster_hosted_zone_id" {
-  description = "The Route53 Hosted Zone ID of the endpoint"
-  value       = module.aurora_mysql.cluster_hosted_zone_id
-}
+# output "db_subnet_group_arn" {
+#   description = "The ARN of the db subnet group"
+#   value       = module.db_subnet_group.db_subnet_group_arn
+# }
 
-# aws_rds_cluster_instances
-output "mysql_cluster_instances" {
-  description = "A map of cluster instances and their attributes"
-  value       = module.aurora_mysql.cluster_instances
-}
+# output "db_parameter_group_id" {
+#   description = "The db parameter group id"
+#   value       = module.db_parameter_group.db_parameter_group_id
+# }
 
-# aws_rds_cluster_endpoint
-output "mysql_additional_cluster_endpoints" {
-  description = "A map of additional cluster endpoints and their attributes"
-  value       = module.aurora_mysql.additional_cluster_endpoints
-}
+# output "db_parameter_group_arn" {
+#   description = "The ARN of the db parameter group"
+#   value       = module.db_parameter_group.db_parameter_group_arn
+# }
 
-# aws_rds_cluster_role_association
-output "mysql_cluster_role_associations" {
-  description = "A map of IAM roles associated with the cluster and their attributes"
-  value       = module.aurora_mysql.cluster_role_associations
-}
+# DB option group
+# output "db_option_group_id" {
+#   description = "The db option group id"
+#   value       = module.db_option_group.db_option_group_id
+# }
 
-# Enhanced monitoring role
-output "mysql_enhanced_monitoring_iam_role_name" {
-  description = "The name of the enhanced monitoring role"
-  value       = module.aurora_mysql.enhanced_monitoring_iam_role_name
-}
+# output "db_option_group_arn" {
+#   description = "The ARN of the db option group"
+#   value       = module.db_option_group.db_option_group_arn
+# }
 
-output "mysql_enhanced_monitoring_iam_role_arn" {
-  description = "The Amazon Resource Name (ARN) specifying the enhanced monitoring role"
-  value       = module.aurora_mysql.enhanced_monitoring_iam_role_arn
-}
+################################################################################
+# CloudWatch Log Group
+################################################################################
 
-output "mysql_enhanced_monitoring_iam_role_unique_id" {
-  description = "Stable and unique string identifying the enhanced monitoring role"
-  value       = module.aurora_mysql.enhanced_monitoring_iam_role_unique_id
-}
-
-# aws_security_group
-output "mysql_security_group_id" {
-  description = "The security group ID of the cluster"
-  value       = module.aurora_mysql.security_group_id
+output "db_instance_cloudwatch_log_groups" {
+  description = "Map of CloudWatch log groups created and their attributes"
+  value       = module.rds_mysql.db_instance_cloudwatch_log_groups
 }

@@ -5,57 +5,178 @@ locals {
       value = v
     }
   ]
+  nanomdm_task_environment = [
+    for k, v in var.nanomdm_task_container_environment : {
+      name  = k
+      value = v
+    }
+  ]
 }
 
-# data "template_file" "nanomdm_container_definitions" {
-#   template = file("./templates/ecs/nanomdm_template.json.tpl")
+module "nanomdm" {
+  source = "../../modules/ecs_task_definition"
 
-#   vars = {
-#     prefix_app_name = local.prefix_app_name
-#     awslogs_group       = aws_cloudwatch_log_group.main.name
-#     aws_region          = data.aws_region.current.name
+  name =  "${var.app_name}-nanomdm"
 
-#     scep_container_image = var.scep_container_image
-#     scep_app_port       = var.scep_app_port
-#     scep_task_container_memory = var.scep_task_definition_memory
-#     scep_task_container_cpu = var.scep_task_definition_cpu
+  image     = "${var.nanomdm_container_image}"
+  essential = true
 
-#     nanomdm_container_image = var.nanomdm_container_image
-#     nanomdm_app_port       = var.nanomdm_app_port
-#     nanomdm_task_container_memory = var.nanomdm_task_definition_memory
-#     nanomdm_task_container_cpu = var.nanomdm_task_definition_cpu
-#     environment         = jsonencode(local.task_environment)
-#   }
-# }
+  portMappings = [
+    {
+      containerPort =  var.nanomdm_app_port
+      hostPort = var.nanomdm_app_port
+      protocol = "tcp"
+    },
+  ]
 
-# templatefile("./templates/nanomdm_template.tftpl", { request_id = "REQ000129834", name = "John" })
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+
+
+#     "logConfiguration": {
+#       "logDriver": "awslogs",
+#       "options": {
+#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+#         "awslogs-region": "${data.aws_region.current.name}",
+#         "awslogs-stream-prefix": "ecs"
+#       }
+#     },
+
+  secrets = [
+    {
+      "name": "MYSQL_PASSWORD",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_PASSWORD::"
+    },
+    {
+      "name": "MYSQL_USERNAME",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_USERNAME::"
+    },
+    {
+      "name": "MYSQL_HOSTNAME",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_HOSTNAME::"
+    },
+    {
+      "name": "MYSQL_DSN",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_DSN::"
+    }
+  ]
+
+  environment = local.nanomdm_task_environment
+
+  memory = var.nanomdm_task_definition_memory
+  cpu    = var.nanomdm_task_definition_cpu
+
+  register_task_definition = false
+}
+
+module "scep" {
+ source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-scep"
+
+  image     = "${var.scep_container_image}"
+  essential = true
+
+  portMappings = [
+    {
+      containerPort =  var.scep_app_port
+      hostPort = var.scep_app_port
+      protocol = "tcp"
+    },
+  ]
+
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+  environment = local.task_environment
+
+  memory = var.scep_task_definition_memory
+  cpu    = var.scep_task_definition_cpu
+
+  register_task_definition = false
+}
+
+
+module "merged" {
+ source = "../../modules/ecs_task_definition//modules/merge"
+
+ container_definitions = [
+   "${module.nanomdm.container_definitions}",
+   "${module.scep.container_definitions}",
+ ]
+}
 
 resource "aws_ecs_task_definition" "task" {
   family                   = local.prefix_app_name
   execution_role_arn       = aws_iam_role.execution.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = var.default_task_definition_cpu
-  memory                   = var.default_task_definition_memory
+  cpu                      = var.container_definition_cpu
+  memory                   = var.container_definition_memory
   task_role_arn            = aws_iam_role.task.arn
-  container_definitions    = templatefile("./templates/nanomdm_template.tftpl", 
-  { prefix_app_name = local.prefix_app_name,
-    awslogs_group       = aws_cloudwatch_log_group.main.name,
-    aws_region          = data.aws_region.current.name,
-    scep_container_image = var.scep_container_image,
-    scep_app_port       = var.scep_app_port,
-    # scep_task_mount_points       = var.scep_task_mount_points,
-    scep_task_container_memory = var.scep_task_definition_memory,
-    scep_task_container_cpu = var.scep_task_definition_cpu,
-    nanomdm_container_image = var.nanomdm_container_image,
-    nanomdm_app_port       = var.nanomdm_app_port,
-    # nanomdm_task_mount_points       = var.nanomdm_task_mount_points,
-    nanomdm_task_container_memory = var.nanomdm_task_definition_memory,
-    nanomdm_task_container_cpu = var.nanomdm_task_definition_cpu,
-    environment         = local.task_environment}
-  )
-  # data.template_file.nanomdm_container_definitions.rendered
-
+  container_definitions    = "${module.merged.container_definitions}"
+#   container_definitions = <<EOF
+#   [
+#     {
+#       "name": "${var.app_name}-nanomdm",
+#       "image": "${var.nanomdm_container_image}",
+#       "memory": ${var.nanomdm_task_definition_memory},
+#       "cpu": ${var.nanomdm_task_definition_cpu},
+#       "environment": ${local.nanomdm_task_environment},
+#       "links": [],
+#       "essential": true,
+#       "portMappings": [
+#         {
+#           "containerPort": ${var.nanomdm_app_port},
+#           "hostPort": ${var.nanomdm_app_port},
+#           "protocol": "tcp"
+#         }
+#     ],
+#     "logConfiguration": {
+#       "logDriver": "awslogs",
+#       "options": {
+#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+#         "awslogs-region": "${data.aws_region.current.name}",
+#         "awslogs-stream-prefix": "ecs"
+#       }
+#     }
+#   },
+#   {
+#     "name": "${var.app_name}-scep",
+#     "image": "${var.scep_container_image}",
+#     "portMappings": [
+#         {
+#           "containerPort": ${var.scep_app_port},
+#           "hostPort": ${var.scep_app_port},
+#           "protocol": "tcp"
+#         }
+#     ],
+#     "logConfiguration": {
+#       "logDriver": "awslogs",
+#       "options": {
+#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+#         "awslogs-region": "${data.aws_region.current.name}",
+#         "awslogs-stream-prefix": "ecs"
+#       }
+#     },
+#     "memory": ${var.scep_task_definition_memory},
+#     "cpu": ${var.scep_task_definition_cpu}
+#   }
+# ]
+# EOF
   dynamic "ephemeral_storage" {
     for_each = var.default_task_definition_ephemeral_storage == 0 ? [] : [var.default_task_definition_ephemeral_storage]
     content {
@@ -157,13 +278,25 @@ resource "aws_ecs_service" "service" {
     }
   }
 
-  dynamic "load_balancer" {
-    for_each = var.is_load_balanced ? var.target_groups : []
-    content {
-      container_name   = var.container_name != "" ? var.container_name : var.prefix
-      container_port   = lookup(load_balancer.value, "container_port", var.task_container_port)
-      target_group_arn = aws_lb_target_group.task[lookup(load_balancer.value, "target_group_name")].arn
-    }
+  # dynamic "load_balancer" {
+  #   for_each = var.is_load_balanced ? var.target_groups : []
+  #   content {
+  #     container_name   = var.container_name != "" ? var.container_name : var.prefix
+  #     container_port   = lookup(load_balancer.value, "container_port", var.task_container_port)
+  #     target_group_arn = aws_lb_target_group.task[lookup(load_balancer.value, "target_group_name")].arn
+  #   }
+  # }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.nanomdm.arn
+    container_name   = "${var.app_name}-nanomdm"
+    container_port   = var.nanomdm_app_port
+  }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.scep.arn
+    container_name   = "${var.app_name}-scep"
+    container_port   = var.scep_app_port
   }
 
   deployment_controller {

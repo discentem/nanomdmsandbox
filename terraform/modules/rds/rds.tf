@@ -1,80 +1,93 @@
-module "aurora_mysql" {
-  source  = "terraform-aws-modules/rds-aurora/aws"
-  version = "7.1.0"
+locals {
+  create_db_instance     = var.create_db_instance
+  create_random_password = local.create_db_instance && var.create_random_password
+  password               = local.create_random_password ? random_password.master_password[0].result : var.password
 
-  name              = "${var.app_name}-rds-aurora-mysql"
-  engine            = "aurora-mysql"
-  engine_mode       = "serverless"
-  storage_encrypted = true
+  # db_subnet_group_name    = var.create_db_subnet_group ? module.db_subnet_group.db_subnet_group_id : var.db_subnet_group_name
+  # parameter_group_name_id = var.create_db_parameter_group ? module.db_parameter_group.db_parameter_group_id : var.parameter_group_name
 
-  subnets               = var.database_subnets
-  create_security_group = true
-
-  monitoring_interval = 60
-
-  apply_immediately   = true
-  skip_final_snapshot = true
-
-  vpc_id                 = var.vpc_id
-  allowed_cidr_blocks    = var.allowed_cidr_blocks
-
-  create_random_password = true
-
-  security_group_use_name_prefix = false
-  db_parameter_group_name         = aws_db_parameter_group.mysql.id
-  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.mysql.id
-  # enabled_cloudwatch_logs_exports = # NOT SUPPORTED
-
-  scaling_configuration = {
-    auto_pause               = true
-    min_capacity             = 2
-    max_capacity             = 16
-    seconds_until_auto_pause = 300
-    timeout_action           = "ForceApplyCapacityChange"
-  }
+  # create_db_option_group = var.create_db_option_group && var.engine != "postgres"
+  # option_group           = local.create_db_option_group ? module.db_option_group.db_option_group_id : var.option_group_name
 }
 
-resource "aws_db_parameter_group" "mysql" {
-  name        = "${var.app_name}-aurora-db-mysql-parameter-group"
-  family      = "aurora-mysql5.7"
-  description = "${var.app_name}-aurora-db-mysql-parameter-group"
+resource "random_password" "master_password" {
+  count = local.create_random_password ? 1 : 0
+
+  length  = var.random_password_length
+  special = false
 }
 
-resource "aws_rds_cluster_parameter_group" "mysql" {
-  name        = "${var.app_name}-aurora-mysql-cluster-parameter-group"
-  family      = "aurora-mysql5.7"
-  description = "${var.app_name}-aurora-mysql-cluster-parameter-group"
+module "rds_mysql" {
+  source  = "terraform-aws-modules/rds/aws"
+
+  identifier = "${var.app_name}-rds"
+
+  engine            = "mysql"
+  engine_version    = "5.7.25"
+  instance_class    = "db.t3.micro"
+  allocated_storage = 10
+
+  # db_name  = ""
+  username = "root"
+  port     = "3306"
+
+  publicly_accessible = true
+
+  iam_database_authentication_enabled = true
+
+  vpc_security_group_ids = [module.security_group.security_group_id]
+
+  maintenance_window = "Mon:00:00-Mon:03:00"
+  backup_window      = "03:00-06:00"
+
+  create_random_password = local.create_random_password
+
+  password             = local.password
+
+  # Enhanced Monitoring - see example for details on how to create the role
+  # by yourself, in case you don't want to create it automatically
+  monitoring_interval = "30"
+  monitoring_role_name = "${var.app_name}-rds-monitoring-role"
+  create_monitoring_role = true
+
+  # DB subnet group
+  create_db_subnet_group = true
+  subnet_ids             = var.database_subnets
+
+  # DB parameter group
+  family = "mysql5.7"
+
+  # DB option group
+  major_engine_version = "5.7"
+
+  # Database Deletion Protection
+  deletion_protection = false
+
+  parameters = [
+    {
+      name = "character_set_client"
+      value = "utf8mb4"
+    },
+    {
+      name = "character_set_server"
+      value = "utf8mb4"
+    }
+  ]
+
+  # options = [
+  #   {
+  #     option_name = "MARIADB_AUDIT_PLUGIN"
+
+  #     option_settings = [
+  #       {
+  #         name  = "SERVER_AUDIT_EVENTS"
+  #         value = "CONNECT"
+  #       },
+  #       {
+  #         name  = "SERVER_AUDIT_FILE_ROTATIONS"
+  #         value = "37"
+  #       },
+  #     ]
+  #   },
+  # ]
 }
-
-# resource "aws_security_group" "rds" {
-#   vpc_id      = var.vpc_id
-#   name        = "${local.prefix_app_name}-rds"
-#   description = "${local.prefix_app_name}-rds security group"
-#   tags = merge(
-#     var.tags,
-#     {
-#       Name = "${local.prefix_app_name}-rds-sg"
-#     },
-#   )
-
-#   ingress {
-#     description = "MySQL Database Ingress"
-#     from_port   = 5432
-#     to_port     = 5432
-#     protocol    = "tcp"
-#     cidr_blocks = var.subnets
-#   }
-
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-#   revoke_rules_on_delete = true
-
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }

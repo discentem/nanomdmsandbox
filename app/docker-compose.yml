@@ -5,7 +5,7 @@ services:
     image: scep
     # image: <my account>.dkr.ecr.<my region>.amazonaws.com/akff-web
     volumes:
-      - ../config/certs/depot:/service/scep/depot
+      - ./config/certs/depot:/service/scep/depot
     build:
       context: .
       dockerfile: ./images/scep/Dockerfile
@@ -26,7 +26,6 @@ services:
       args:
         - NANOMDM_VERSION=0.2.0
         - API_KEY=nanomdm
-        - CA_FILE_NAME=ca.pem
     ports:
       - "9000:9000"
 

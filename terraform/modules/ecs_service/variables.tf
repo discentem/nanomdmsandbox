@@ -33,6 +33,18 @@ variable "platform_version" {
   default     = "LATEST"
 }
 
+variable "container_definition_cpu" {
+  description = "Amount of CPU to reserve for the task."
+  default     = null
+  type        = number
+}
+
+variable "container_definition_memory" {
+  description = "The soft limit (in MiB) of memory to reserve for the task."
+  default     = null
+  type        = number
+}
+
 variable "scep_container_image" {
   description = "The SCEP image used to start a container."
   type        = string
@@ -46,7 +58,7 @@ variable "scep_app_port" {
 
 variable "scep_task_definition_cpu" {
   description = "Amount of CPU to reserve for the task."
-  default     = 256
+  default     = 512
   type        = number
 }
 
@@ -79,16 +91,21 @@ variable "nanomdm_task_definition_memory" {
   type        = number
 }
 
+variable "nanomdm_task_container_environment" {
+  description = "The environment variables to pass to a container."
+  default     = {}
+  type        = map(string)
+}
 
 variable "default_task_definition_cpu" {
   description = "Amount of CPU to reserve for the task."
-  default     = 512
+  default     = 256
   type        = number
 }
 
 variable "default_task_definition_memory" {
   description = "The soft limit (in MiB) of memory to reserve for the task."
-  default     = 1024
+  default     = 512
   type        = number
 }
 
@@ -263,18 +280,6 @@ variable "task_health_check" {
   default     = null
 }
 
-variable "task_container_cpu" {
-  description = "Amount of CPU to reserve for the container."
-  default     = null
-  type        = number
-}
-
-variable "task_container_memory" {
-  description = "The hard limit (in MiB) of memory for the container."
-  default     = null
-  type        = number
-}
-
 variable "task_container_memory_reservation" {
   description = "The soft limit (in MiB) of memory to reserve for the container."
   default     = null
@@ -327,4 +332,43 @@ variable "enable_execute_command" {
   type        = bool
   description = "Specifies whether to enable Amazon ECS Exec for the tasks within the service."
   default     = true
+}
+
+
+variable "zone_id" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "domain_name" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "lb_subdomain_name" {
+  type        = string
+  description = ""
+  default     = "nanomdm-infra"
+}
+
+variable "certificate_arn" {
+  type        = string
+  description = ""
+}
+
+variable "mysql_secrets_manager_arn" {
+  type        = string
+  description = ""
+}
+
+variable "public_inbound_cidr_blocks_ipv4" {
+  type = list(string)
+  description = "list of allowed CIDRs to reach public resources"
+}
+
+variable "public_inbound_cidr_blocks_ipv6" {
+  type = list(string)
+  description = "list of allowed CIDRs to reach public resources"
 }

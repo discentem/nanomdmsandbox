@@ -14,7 +14,7 @@ provider "aws" {
   region = var.aws_region
   default_tags {
     tags = {
-      Name = "nanomdm"
+      App_Name = "nanomdm"
     }
   }
   access_key = var.AWS_ACCESS_KEY

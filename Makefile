@@ -49,14 +49,17 @@ build-containers: .check-args
 		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)/$$container:latest ; \
 	done
 
+# ------------------------------------------------------------------------------
+# Build and Push All Platform Containers
+# ------------------------------------------------------------------------------
 .PHONY: build-containers-docker-compose # Build all containers and publish the containers to AWS ECR
-build-containers-docker-compose  : .check-args
+build-containers-docker-compose: .check-args
 	$(info *** building containers using docker-compose)
 	docker-compose -f ./$(APP_DIR)/docker-compose.yml build
-	$(info *** tagging and uploading containers to AWS ECR)
+	$(info *** build and upload containers to AWS ECR)
 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 	@for container in $(CONTAINERS); do \
-		echo "tagging $$container" ; \
+		echo "building $$container" ; \
 		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
 		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
 	done
@@ -95,5 +98,13 @@ tf-plan: # Runs tf-plan
 .PHONY: tf-init # Runs tf-init
 tf-init: # Runs tf-init
 	terraform -chdir=$(TERRAFORM_DIR) init
+
+
+# golang - cli
+#
+#
+.PHONY: cli # go build
+cli: # go build
+	go build -o build/cli ./cmd/main.go
 
 .PHONY: .check-args
