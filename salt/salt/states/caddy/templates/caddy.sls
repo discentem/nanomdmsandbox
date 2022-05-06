@@ -1,13 +1,7 @@
 #!py
 
 import json
-# salt magically makes salt.utils.dict available
-#  so we have to tell pylance to not report missingImports
-from salt.utils.odict import OrderedDict # pyright: reportMissingImports=false
-
-# salt makes template_variables dict available but template_variables is not defined in this file
-#  so we have to tell pylance to not report undefined template_variables
-# pyright: reportUndefinedVariable=false
+from salt.utils.odict import OrderedDict
 
 def run():
 
@@ -21,8 +15,7 @@ def run():
 
 
     hostname_mappings = template_variables['hostname_mappings']
-    # hostname_mappings will be salt.utils.odict.OrderedDict if ../init.sls is using the default renderer
-    #  https://docs.saltproject.io/en/latest/ref/renderers/all/salt.renderers.yaml.html.
+    # hostname_mappings will be salt.utils.odict.OrderedDict if ../init.sls is using the default renderer https://docs.saltproject.io/en/latest/ref/renderers/all/salt.renderers.yaml.html.
     if isinstance(hostname_mappings, OrderedDict) or isinstance(hostname_mappings, dict):
         pass
     else:
