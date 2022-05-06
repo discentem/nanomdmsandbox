@@ -1,11 +1,21 @@
 {
+  // if #!py, parse as yaml. this overrides the files.assocations below
   "shebang.associations": [
     {
         "pattern": "#!py",
         "language": "python"
     }
   ],
+  // assume all .sls files can be parsed as yaml
   "files.associations": {
     "*.sls": "yaml"
+  },
+  "python.analysis.diagnosticSeverityOverrides": {
+    // salt often makes variables that appear undefined
+    //  available in states, templates, and other stuff
+    "reportUndefinedVariable": "none",
+    // salt often handles fulfilling imports in a way
+    //  that pylance cannot parse
+    "reportMissingImports": "none"
   }
 }
