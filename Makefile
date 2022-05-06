@@ -53,7 +53,11 @@ build-containers: .check-args
 # Build and Push All Platform Containers
 # ------------------------------------------------------------------------------
 .PHONY: build-containers-docker-compose # Build all containers and publish the containers to AWS ECR
+build-containers-docker-compose: DOCKER_BUILDKIT=1
+build-containers-docker-compose: COMPOSE_DOCKER_CLI_BUILD=1
 build-containers-docker-compose: .check-args
+	echo ${DOCKER_BUILDKIT}
+	echo ${COMPOSE_DOCKER_CLI_BUILD}
 	$(info *** building containers using docker-compose)
 	docker-compose -f ./$(APP_DIR)/docker-compose.yml build
 	$(info *** build and upload containers to AWS ECR)

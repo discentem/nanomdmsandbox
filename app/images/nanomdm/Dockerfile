@@ -1,4 +1,4 @@
-FROM alpine:3.14 AS build
+FROM --platform=linux/amd64 alpine:3.14
 
 RUN apk update \
   && apk add bash curl gzip --no-cache aws-cli
