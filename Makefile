@@ -99,4 +99,12 @@ tf-plan: # Runs tf-plan
 tf-init: # Runs tf-init
 	terraform -chdir=$(TERRAFORM_DIR) init
 
+
+# golang - cli
+#
+#
+.PHONY: cli # go build
+cli: # go build
+	go build -o build/cli ./cmd/main.go
+
 .PHONY: .check-args

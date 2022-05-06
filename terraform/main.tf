@@ -40,10 +40,15 @@ module "vpc" {
   private_subnets  = ["10.99.3.0/24", "10.99.4.0/24", "10.99.5.0/24"]
   database_subnets = ["10.99.7.0/24", "10.99.8.0/24", "10.99.9.0/24"]
 
+  create_database_subnet_group = true
+
   enable_ipv6 = true
 
   enable_nat_gateway = true
   single_nat_gateway = true
+
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 }
 
 module "ecs_cluster" {
@@ -52,6 +57,17 @@ module "ecs_cluster" {
   prefix   = var.prefix
   app_name = var.app_name
 }
+
+# module "rds_auora" {
+#   source = "./modules/rds_aurora"
+
+#   app_name = var.app_name
+
+#   aws_region          = var.aws_region
+#   vpc_id              = module.vpc.vpc_id
+#   database_subnets    = module.vpc.database_subnets
+#   allowed_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+# }
 
 module "rds" {
   source = "./modules/rds"
@@ -62,8 +78,10 @@ module "rds" {
   vpc_id              = module.vpc.vpc_id
   database_subnets    = module.vpc.database_subnets
   allowed_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+  
+  create_db_instance  = true
+  create_random_password = true
 }
-
 module "rds_secret" {
   source = "./modules/secrets"
 
@@ -71,8 +89,16 @@ module "rds_secret" {
 
   aws_region           = var.aws_region
   aws_account_id       = data.aws_caller_identity.current.account_id
-
-  secret_string        = jsonencode({ USERNAME = module.rds.mysql_cluster_master_username, PASSWORD = module.rds.mysql_cluster_master_password})
+  
+  secret_string        = jsonencode(
+  { 
+    MYSQL_USERNAME = module.rds.db_instance_username,
+    MYSQL_PASSWORD = module.rds.db_instance_password,
+    MYSQL_HOSTNAME = module.rds.db_instance_address,
+    MYSQL_DSN      = "${module.rds.db_instance_username}:${module.rds.db_instance_password}@tcp(${module.rds.db_instance_endpoint})/"
+  }
+  )
+  # secret_string        = jsonencode({ MYSQL_USERNAME = module.rds.mysql_cluster_master_username, MYSQL_PASSWORD = module.rds.mysql_cluster_master_password})
 }
 
 module "acm_lb_certificate" {
@@ -100,8 +126,8 @@ module "ecs_nanomdm" {
   zone_id     = module.route53.zone_id
   certificate_arn = module.acm_lb_certificate.acm_certificate_arn
 
-  container_definition_cpu = 256
-  container_definition_memory = 512
+  container_definition_cpu = 512
+  container_definition_memory = 1024
 
   scep_container_image = "${module.scep_ecr.repository_url}:latest"
   scep_app_port        = 8080
@@ -123,9 +149,14 @@ module "ecs_nanomdm" {
 
   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}:latest"
   nanomdm_app_port        = 9000
+
+  mysql_secrets_manager_arn = module.rds_secret.arn
   nanomdm_task_container_environment = {
-    MYSQL_HOSTNAME = module.rds.mysql_cluster_endpoint
-    MYSQL_USERNAME = module.rds.mysql_cluster_master_username
+    # MYSQL_HOSTNAME = "nanomdm-rds.civ0hthv7lpj.us-east-1.rds.amazonaws.com"
+    APP_NAME       = var.app_name
+    # [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
+    # ${module.rds.mysql_cluster_master_username}:${}@tcp(${module.rds.mysql_cluster_endpoint}:3306)/${module.rds.mysql_cluster_database_name}
+    # MYSQL_DSN      = "mysql:host=${module.rds.mysql_cluster_endpoint};dbname=databasename"
   }
 
   # nanomdm_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }

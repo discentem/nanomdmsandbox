@@ -357,3 +357,8 @@ variable "certificate_arn" {
   type        = string
   description = ""
 }
+
+variable "mysql_secrets_manager_arn" {
+  type        = string
+  description = ""
+}

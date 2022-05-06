@@ -21,3 +21,6 @@ package
 # python
 __pycache__
 *.info
+
+# build/golang
+build

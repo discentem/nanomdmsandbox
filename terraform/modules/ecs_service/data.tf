@@ -28,6 +28,14 @@ data "aws_iam_policy_document" "task_permissions" {
       "logs:PutLogEvents",
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:*"
+    ]
+    resources = ["*"]
+  }
 }
 
 data "aws_iam_policy_document" "task_ecs_exec_policy" {
@@ -69,7 +77,8 @@ data "aws_iam_policy_document" "task_execution_permissions" {
   statement {
     effect = "Allow"
     actions = [
-      "rds:*"
+      "rds:*",
+      "secretsmanager:*"
     ]
     resources = ["*"]
   }

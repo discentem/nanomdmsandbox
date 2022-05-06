@@ -38,6 +38,8 @@ module "nanomdm" {
     }
   }
 
+
+
 #     "logConfiguration": {
 #       "logDriver": "awslogs",
 #       "options": {
@@ -46,6 +48,25 @@ module "nanomdm" {
 #         "awslogs-stream-prefix": "ecs"
 #       }
 #     },
+
+  secrets = [
+    {
+      "name": "MYSQL_PASSWORD",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_PASSWORD::"
+    },
+    {
+      "name": "MYSQL_USERNAME",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_USERNAME::"
+    },
+    {
+      "name": "MYSQL_HOSTNAME",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_HOSTNAME::"
+    },
+    {
+      "name": "MYSQL_DSN",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_DSN::"
+    }
+  ]
 
   environment = local.nanomdm_task_environment
 
