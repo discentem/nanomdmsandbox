@@ -3,7 +3,7 @@
 def run():
     pillar = {
         'caddy': {
-            'path': "/Users/Shared/caddy.json"
+            'path': "/opt/caddy.json"
         }
     }
 

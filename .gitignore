@@ -11,6 +11,7 @@ package
 .terraform.lock
 *.tfstate
 *.tfstate.backup
+*.terraform.tfstate.lock.info
 
 # MacOS
 .DS_Store
