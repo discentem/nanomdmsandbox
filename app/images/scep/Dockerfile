@@ -1,7 +1,7 @@
-FROM alpine:3.14 AS build
+FROM --platform=linux/amd64 ubuntu:20.04
 
-RUN apk update \
-  && apk add bash curl gzip
+RUN apt-get update && apt-get -y upgrade
+RUN apt install -y curl gzip unzip
 
 ARG SCEP_VERSION
 ENV SCEP_VERSION $SCEP_VERSION

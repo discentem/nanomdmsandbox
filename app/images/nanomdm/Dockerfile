@@ -1,7 +1,13 @@
-FROM alpine:3.14 AS build
+FROM --platform=linux/amd64 ubuntu:20.04
+# FROM --platform=linux/amd64 alpine:3.14
+# RUN apk update \
+#   && apk add bash curl gzip --no-cache aws-cli
 
-RUN apk update \
-  && apk add bash curl gzip --no-cache aws-cli
+RUN apt-get update && apt-get -y upgrade
+RUN apt install -y curl gzip unzip
+
+# RUN apk update \
+#   && apk add bash curl gzip --no-cache aws-cli
 
 ARG NANOMDM_VERSION
 ENV NANOMDM_VERSION $NANOMDM_VERSION
@@ -22,6 +28,8 @@ ENV APP_NAME $APP_NAME
 
 WORKDIR /service/nanomdm
 
+COPY ../../config/certs/depot/ca.pem /service/nanomdm/ca.pem
+
 RUN curl -RLO https://github.com/micromdm/nanomdm/releases/download/v$NANOMDM_VERSION/nanomdm-linux-amd64-v$NANOMDM_VERSION.zip
 
 RUN unzip nanomdm-linux-amd64-v$NANOMDM_VERSION.zip
@@ -29,7 +37,6 @@ RUN unzip nanomdm-linux-amd64-v$NANOMDM_VERSION.zip
 RUN chmod a+x ./nanomdm-linux-amd64
 
 ENV MYSQL_DSN $MYSQL_DSN
-RUN export MYSQL_DSN="${MYSQL_USERNAME}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOSTNAME}:3306)/${APP_NAME}-rds-aurora-mysql"
 
 # RUN export MYSQL_DSN=$(aws rds generate-db-auth-token \
 #    --hostname ${MYSQL_HOSTNAME} \
