@@ -1,5 +1,6 @@
 resource "aws_secretsmanager_secret" "secret" {
   name = var.name
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_policy" "policy" {
