@@ -40,8 +40,6 @@ module "rds_mysql" {
   maintenance_window = "Mon:00:00-Mon:03:00"
   backup_window      = "03:00-06:00"
 
-  create_random_password = local.create_random_password
-
   password             = local.password
 
   # Enhanced Monitoring - see example for details on how to create the role
