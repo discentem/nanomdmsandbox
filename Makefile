@@ -59,7 +59,7 @@ build-containers-docker-compose: .check-args
 	$(info *** building containers using docker-compose)
 	docker-compose -f ./$(APP_DIR)/docker-compose.yml build
 	$(info *** build and upload containers to AWS ECR)
-	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
+	export AWS_PROFILE=nanomdm; aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 	@for container in $(CONTAINERS); do \
 		echo "building $$container" ; \
 		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
@@ -101,6 +101,17 @@ tf-plan: # Runs tf-plan
 tf-init: # Runs tf-init
 	terraform -chdir=$(TERRAFORM_DIR) init
 
+
+# tf-first-run
+#
+#
+
+tf-create-route53-and-ecr: 
+	terraform -chdir=$(TERRAFORM_DIR) init
+	terraform -chdir=$(TERRAFORM_DIR) apply -target module.route53 -target module.nanomdm_ecr -target module.scep_ecr
+
+.PHONY: tf-first-run # Runs tf-first-run
+tf-first-run: .check-args tf-create-route53-and-ecr build-containers-docker-compose # Runs tf-first-run
 
 # golang - cli
 #
