@@ -33,18 +33,25 @@ module "vpc" {
   version = "~> 3.0"
 
   name = var.app_name
-  cidr = "10.99.0.0/18"
+  # cidr = "10.99.0.0/18"
 
-  azs              = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
-  public_subnets   = ["10.99.0.0/24", "10.99.1.0/24", "10.99.2.0/24"]
-  private_subnets  = ["10.99.3.0/24", "10.99.4.0/24", "10.99.5.0/24"]
-  database_subnets = ["10.99.7.0/24", "10.99.8.0/24", "10.99.9.0/24"]
+  # azs              = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
+  # public_subnets   = ["10.99.0.0/24", "10.99.1.0/24", "10.99.2.0/24"]
+  # private_subnets  = ["10.99.3.0/24", "10.99.4.0/24", "10.99.5.0/24"]
+  # database_subnets = ["10.99.7.0/24", "10.99.8.0/24", "10.99.9.0/24"]
+  
+  cidr = var.vpc_cidr
 
-  create_database_subnet_group = true
+  azs              = var.availability_zones
+  public_subnets   = var.public_subnets
+  private_subnets  = var.private_subnets
+  database_subnets = var.database_subnets
 
-  enable_ipv6 = true
+  create_database_subnet_group = var.create_database_subnet_group
 
-  enable_nat_gateway = true
+  enable_ipv6 = var.enable_ipv6
+
+  enable_nat_gateway = var.enable_nat_gateway
   single_nat_gateway = true
 
   enable_dns_hostnames = true
@@ -166,11 +173,11 @@ module "ecs_nanomdm" {
   # TODO: Fix this or OSS recommend a /health API
   nanomdm_health_check = {
     port                = "traffic-port"
-    path                = "/v1"
+    path                = "/version"
     health_threshold    = "3"
     interval            = "60"
     protocol            = "HTTP"
-    matcher             = "404"
+    matcher             = "200"
     timeout             = "3"
     unhealthy_threshold = "2"
   }

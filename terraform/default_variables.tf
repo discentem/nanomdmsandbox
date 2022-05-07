@@ -43,18 +43,41 @@ variable "vpc_cidr" {
   description = "VPC CIDR Block"
 }
 
-variable "public_subnets_cidr" {
-  type = list
+variable "public_subnets" {
+  type = list(string)
   description = "Public Subnet CIDR"
 }
 
-variable "private_subnets_cidr" {
-  type = list
+variable "private_subnets" {
+  type = list(string)
   description = "Private Subnet CIDR"
 }
 
+variable "database_subnets" {
+  type = list(string)
+  description = "Database Subnet CIDR"
+}
+
+variable "enable_ipv6" {
+  type = bool
+  description = "Enable the usage of IPv6"
+  default = true
+}
+
+variable "enable_nat_gateway" {
+  type = bool
+  description = "Enable the usage of a NAT gateway"
+  default = true
+}
+
+variable "create_database_subnet_group" {
+  type = bool
+  description = "Enable the creation of the database subnet group"
+  default = true
+}
+
 variable "availability_zones" {
-  type = list
+  type = list(string)
   description = "VPC AZs"
 }
 

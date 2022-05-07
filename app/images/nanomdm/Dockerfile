@@ -28,6 +28,8 @@ ENV APP_NAME $APP_NAME
 
 WORKDIR /service/nanomdm
 
+COPY ../../config/certs/depot/ca.pem /service/nanomdm/ca.pem
+
 RUN curl -RLO https://github.com/micromdm/nanomdm/releases/download/v$NANOMDM_VERSION/nanomdm-linux-amd64-v$NANOMDM_VERSION.zip
 
 RUN unzip nanomdm-linux-amd64-v$NANOMDM_VERSION.zip
