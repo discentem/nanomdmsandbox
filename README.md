@@ -1,4 +1,21 @@
-## Run Salt
+## Quickstart
+
+- Buy a domain
+- brew install tfenv
+- tfenv install 1.1.9
+- <INSTRUCTIONS FOR GENERATING IAM KEYS>
+- create terraform variable files
+    - cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
+    - cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
+    - Fill in secrets
+
+ASSUME AWS ROLE locally
+
+- tfenv use 1.1.9
+- make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
+- Point domain at your nameservers that were just created
+
+## Containers
 
 ### Build from m1
 You must enable these experimental docker features in your docker_config if building from m1 mac.
@@ -11,6 +28,8 @@ You must enable these experimental docker features in your docker_config if buil
   }
 }
 ```
+
+## Run Salt
 
 ## Linux 
 
