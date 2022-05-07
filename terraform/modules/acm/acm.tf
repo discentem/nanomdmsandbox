@@ -1,6 +1,10 @@
 resource "aws_acm_certificate" "this" {
   domain_name       = var.domain_name
   validation_method = "DNS"
+
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "aws_route53_record" "this" {
@@ -18,9 +22,18 @@ resource "aws_route53_record" "this" {
   ttl             = 60
   type            = each.value.type
   zone_id         = var.zone_id
+
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "aws_acm_certificate_validation" "this" {
   certificate_arn         = aws_acm_certificate.this.arn
   validation_record_fqdns = [for record in aws_route53_record.this : record.fqdn]
+
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
+
 }
