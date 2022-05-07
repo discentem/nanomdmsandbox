@@ -10,6 +10,7 @@
     - Fill in secrets
       - CIDR BLOCKS
       - root domain name 
+      - 
 
 ASSUME AWS ROLE locally
 
