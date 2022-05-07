@@ -89,6 +89,35 @@ module "rds" {
   create_db_instance  = true
   create_random_password = true
 }
+
+module "ec2" {
+    source = "./modules/ec2"
+  
+  app_name = var.app_name
+  name = "ec2"
+  key_name = aws_key_pair.key_pair.key_name
+  ami = "ami-0022f774911c1d690"
+  instance_type = "t2.micro"
+  vpc_security_group_ids = [module.ec2_security_group.security_group_id]
+  subnet_id = module.vpc.private_subnets[0]
+}
+
+module "ec2_security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 4.9.0"
+
+  name        = "${var.app_name}-ec2"
+  description = "${var.app_name}-ec2 security group"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks      = var.public_inbound_cidr_blocks_ipv4
+  ingress_rules            = ["ssh-tcp"]
+}
+
+resource "aws_key_pair" "key_pair" {
+  key_name   = "ec2_key_pair"
+  public_key = var.public_key
+}
 module "rds_secret" {
   source = "./modules/secrets"
 

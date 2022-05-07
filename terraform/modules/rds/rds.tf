@@ -29,6 +29,7 @@ module "rds_mysql" {
 
   # db_name  = ""
   username = "root"
+  password = local.password
   port     = "3306"
 
   publicly_accessible = true
@@ -40,7 +41,6 @@ module "rds_mysql" {
   maintenance_window = "Mon:00:00-Mon:03:00"
   backup_window      = "03:00-06:00"
 
-  password             = local.password
   skip_final_snapshot  = true
 
   # Enhanced Monitoring - see example for details on how to create the role
