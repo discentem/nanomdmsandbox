@@ -93,10 +93,5 @@ variable "public_inbound_cidr_blocks_ipv6" {
   # default = ["::/0"]
 }
 
-variable "repository_name" {
-  type = string
-  description = "name of ecr repo"
-}
-
 variable "AWS_ACCESS_KEY" {}
 variable "AWS_SECRET_KEY" {}

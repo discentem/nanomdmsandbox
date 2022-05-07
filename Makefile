@@ -59,7 +59,7 @@ build-containers-docker-compose: .check-args
 	$(info *** building containers using docker-compose)
 	docker-compose -f ./$(APP_DIR)/docker-compose.yml build
 	$(info *** build and upload containers to AWS ECR)
-	export AWS_PROFILE=nanomdm; aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
+	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 	@for container in $(CONTAINERS); do \
 		echo "building $$container" ; \
 		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \

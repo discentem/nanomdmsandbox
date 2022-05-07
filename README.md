@@ -12,11 +12,16 @@
 ASSUME AWS ROLE locally
 
 - tfenv use 1.1.9
+- EXPORT AWS_PROFILE={INSERT AWS_PROFILE_NAME HERE}
 - make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
 - Point domain at your nameservers that were just created
 - WAIT FOR DNS PROPAGATION
 - make tf-plan
 - make tf-apply
+
+### Destroying Terraform Infra
+
+> :warning: **You may have to manually delete some components of an RDS after running `terraform destroy`.
 
 ## Containers
 
