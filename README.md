@@ -14,6 +14,9 @@ ASSUME AWS ROLE locally
 - tfenv use 1.1.9
 - make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
 - Point domain at your nameservers that were just created
+- WAIT FOR DNS PROPAGATION
+- make tf-plan
+- make tf-apply
 
 ## Containers
 
