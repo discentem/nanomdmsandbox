@@ -21,7 +21,7 @@ ASSUME AWS ROLE locally
 
 ### Destroying Terraform Infra
 
-> :warning: **You may have to manually delete some components of an RDS after running `terraform destroy`.
+> :warning: **You may have to manually delete some components of an RDS after running `terraform destroy`. See this [github issue](https://github.com/hashicorp/terraform-provider-aws/issues/4597#issuecomment-912910432) for more info.
 
 ## Containers
 
