@@ -128,55 +128,7 @@ resource "aws_ecs_task_definition" "task" {
   memory                   = var.container_definition_memory
   task_role_arn            = aws_iam_role.task.arn
   container_definitions    = "${module.merged.container_definitions}"
-#   container_definitions = <<EOF
-#   [
-#     {
-#       "name": "${var.app_name}-nanomdm",
-#       "image": "${var.nanomdm_container_image}",
-#       "memory": ${var.nanomdm_task_definition_memory},
-#       "cpu": ${var.nanomdm_task_definition_cpu},
-#       "environment": ${local.nanomdm_task_environment},
-#       "links": [],
-#       "essential": true,
-#       "portMappings": [
-#         {
-#           "containerPort": ${var.nanomdm_app_port},
-#           "hostPort": ${var.nanomdm_app_port},
-#           "protocol": "tcp"
-#         }
-#     ],
-#     "logConfiguration": {
-#       "logDriver": "awslogs",
-#       "options": {
-#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
-#         "awslogs-region": "${data.aws_region.current.name}",
-#         "awslogs-stream-prefix": "ecs"
-#       }
-#     }
-#   },
-#   {
-#     "name": "${var.app_name}-scep",
-#     "image": "${var.scep_container_image}",
-#     "portMappings": [
-#         {
-#           "containerPort": ${var.scep_app_port},
-#           "hostPort": ${var.scep_app_port},
-#           "protocol": "tcp"
-#         }
-#     ],
-#     "logConfiguration": {
-#       "logDriver": "awslogs",
-#       "options": {
-#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
-#         "awslogs-region": "${data.aws_region.current.name}",
-#         "awslogs-stream-prefix": "ecs"
-#       }
-#     },
-#     "memory": ${var.scep_task_definition_memory},
-#     "cpu": ${var.scep_task_definition_cpu}
-#   }
-# ]
-# EOF
+
   dynamic "ephemeral_storage" {
     for_each = var.default_task_definition_ephemeral_storage == 0 ? [] : [var.default_task_definition_ephemeral_storage]
     content {
