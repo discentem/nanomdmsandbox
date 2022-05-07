@@ -41,6 +41,7 @@ module "rds_mysql" {
   backup_window      = "03:00-06:00"
 
   password             = local.password
+  skip_final_snapshot  = true
 
   # Enhanced Monitoring - see example for details on how to create the role
   # by yourself, in case you don't want to create it automatically
