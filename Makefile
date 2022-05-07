@@ -38,16 +38,20 @@ help:
 # ------------------------------------------------------------------------------
 # Build and Push All Containers
 # ------------------------------------------------------------------------------
-.PHONY: build-containers # Build all containers and publish the containers to AWS ECR
-build-containers: .check-args
-	$(info *** build and upload containers to AWS ECR)
-	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
-	@for container in $(CONTAINERS); do \
-		echo "building $$container" ; \
-		docker build -t $$container $(CONTAINERS_DIR)/$$container/. ; \
-		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)/$$container:latest ; \
-		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)/$$container:latest ; \
-	done
+
+# As of today, this does not include all the env variables we need.
+# Use the docker compose target.
+
+# .PHONY: build-containers # Build all containers and publish the containers to AWS ECR
+# build-containers: .check-args
+# 	$(info *** build and upload containers to AWS ECR)
+# 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
+# 	@for container in $(CONTAINERS); do \
+# 		echo "building $$container" ; \
+# 		docker build -t $$container $(CONTAINERS_DIR)/$$container/. ; \
+# 		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)/$$container:latest ; \
+# 		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(CONTAINERS_PREFIX)/$$container:latest ; \
+# 	done
 
 # ------------------------------------------------------------------------------
 # Build and Push All Platform Containers
@@ -65,6 +69,8 @@ build-containers-docker-compose: .check-args
 		docker tag $$container:latest $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
 		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
 	done
+
+docker-compose: build-containers-docker-compose
 
 # terraform deploy
 #

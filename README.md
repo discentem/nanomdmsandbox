@@ -8,11 +8,16 @@
     - cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
     - cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
     - Fill in secrets
+      - CIDR BLOCKS
+      - root domain name 
+      - 
 
 ASSUME AWS ROLE locally
 
 - tfenv use 1.1.9
-- EXPORT AWS_PROFILE={INSERT AWS_PROFILE_NAME HERE}
+- export AWS_PROFILE={INSERT AWS_PROFILE_NAME HERE}
+- export AWS_ACCOUNT_ID={INSERT ACCOUNT ID HERE}
+- export AWS_PROFILE={INSERT PROFILE HERE}
 - make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
 - Point domain at your nameservers that were just created
 - WAIT FOR DNS PROPAGATION
