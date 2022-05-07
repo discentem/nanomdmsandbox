@@ -1,5 +1,17 @@
 ## Run Salt
 
+### Build from m1
+You must enable these experimental docker features in your docker_config if building from m1 mac.
+
+```json
+{
+"experimental": true,
+  "features": {
+    "buildkit": true
+  }
+}
+```
+
 ## Linux 
 
 ### Sync files
