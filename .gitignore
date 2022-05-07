@@ -1,4 +1,5 @@
 # Terraform build stuff
+!terraform/example_tfvars/secrets.auto.tfvars.json
 _secrets.auto.tfvars
 _secrets.auto.tfvars.json
 secrets.auto.tfvars
