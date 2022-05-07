@@ -2,7 +2,7 @@ module "ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
-  name = "{$var.app_name}-${var.name}"
+  name = "${var.app_name}-${var.name}"
 
   ami                    = var.ami
   instance_type          = var.instance_type
