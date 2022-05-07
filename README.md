@@ -8,6 +8,8 @@
     - cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
     - cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
     - Fill in secrets
+      - CIDR BLOCKS
+      - root domain name 
 
 ASSUME AWS ROLE locally
 
