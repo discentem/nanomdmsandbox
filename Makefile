@@ -102,6 +102,17 @@ tf-init: # Runs tf-init
 	terraform -chdir=$(TERRAFORM_DIR) init
 
 
+# tf-first-run
+#
+#
+
+tf-create-route53-and-ecr: 
+	terraform -chdir=$(TERRAFORM_DIR) init
+	terraform -chdir=$(TERRAFORM_DIR) apply -target module.route53 -target module.nanomdm_ecr -target module.scep_ecr
+
+.PHONY: tf-first-run # Runs tf-first-run
+tf-first-run: .check-args tf-create-route53-and-ecr build-containers-docker-compose # Runs tf-first-run
+
 # golang - cli
 #
 #
