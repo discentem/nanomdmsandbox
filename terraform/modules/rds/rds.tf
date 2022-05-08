@@ -2,12 +2,6 @@ locals {
   create_db_instance     = var.create_db_instance
   create_random_password = local.create_db_instance && var.create_random_password
   password               = local.create_random_password ? random_password.master_password[0].result : var.password
-
-  # db_subnet_group_name    = var.create_db_subnet_group ? module.db_subnet_group.db_subnet_group_id : var.db_subnet_group_name
-  # parameter_group_name_id = var.create_db_parameter_group ? module.db_parameter_group.db_parameter_group_id : var.parameter_group_name
-
-  # create_db_option_group = var.create_db_option_group && var.engine != "postgres"
-  # option_group           = local.create_db_option_group ? module.db_option_group.db_option_group_id : var.option_group_name
 }
 
 resource "random_password" "master_password" {
@@ -23,17 +17,18 @@ module "rds_mysql" {
   identifier = "${var.app_name}-rds"
 
   engine            = "mysql"
-  # engine_version    = "5.7.25"
   engine_version    = "8.0.19"
   instance_class    = "db.t3.micro"
   allocated_storage = 10
 
-  # db_name  = ""
   username = "root"
   password = local.password
   port     = "3306"
 
   publicly_accessible = false
+
+  create_random_password = var.create_random_password
+  create_db_instance = local.create_db_instance
 
   iam_database_authentication_enabled = true
 
@@ -56,11 +51,9 @@ module "rds_mysql" {
 
   # DB parameter group
   family               = "mysql8.0" # DB parameter group
-  # family = "mysql5.7"
 
   # DB option group
   major_engine_version = "8.0"      # DB option group
-  # major_engine_version = "5.7"
 
   # Database Deletion Protection
   deletion_protection = false

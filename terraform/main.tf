@@ -87,12 +87,18 @@ module "rds" {
   allowed_cidr_blocks = module.vpc.private_subnets_cidr_blocks
   
   create_db_instance  = true
-  create_random_password = true
+
+  password = random_password.mysql_rds_master_password.result
+}
+
+resource "random_password" "mysql_rds_master_password" {
+  length  = "20"
+  special = false
 }
 
 module "ec2" {
-    source = "./modules/ec2"
-  
+  source = "./modules/ec2"
+
   app_name = var.app_name
   name = "ec2"
   key_name = aws_key_pair.key_pair.key_name
@@ -141,7 +147,7 @@ module "rds_secret" {
     MYSQL_USERNAME = module.rds.db_instance_username,
     MYSQL_PASSWORD = module.rds.db_instance_password,
     MYSQL_HOSTNAME = module.rds.db_instance_address,
-    MYSQL_DSN      = "${module.rds.db_instance_username}:${module.rds.db_instance_password}@tcp(${module.rds.db_instance_endpoint})/nanomdm"
+    MYSQL_DSN      = "${module.rds.db_instance_username}:${random_password.mysql_rds_master_password.result}@tcp(${module.rds.db_instance_endpoint})/nanomdm"
   }
   )
   # secret_string        = jsonencode({ MYSQL_USERNAME = module.rds.mysql_cluster_master_username, MYSQL_PASSWORD = module.rds.mysql_cluster_master_password})
