@@ -37,7 +37,10 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(string(b))
+		err = os.WriteFile("enrollment.mobileconfig", b, 0500)
+		if err != nil {
+			log.Fatal(err)
+		}
 		os.Exit(1)
 	}
 
