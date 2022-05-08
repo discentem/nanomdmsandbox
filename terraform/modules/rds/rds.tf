@@ -55,10 +55,12 @@ module "rds_mysql" {
   subnet_ids             = var.database_subnets
 
   # DB parameter group
-  family = "mysql5.7"
+  family               = "mysql8.0" # DB parameter group
+  # family = "mysql5.7"
 
   # DB option group
-  major_engine_version = "5.7"
+  major_engine_version = "8.0"      # DB option group
+  # major_engine_version = "5.7"
 
   # Database Deletion Protection
   deletion_protection = false
