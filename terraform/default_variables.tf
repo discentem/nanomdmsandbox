@@ -97,6 +97,7 @@ variable "public_key" {
   type = string
   description = "ec2 key pair public key material"
   sensitive = true
+  default = ""
 }
 
 # variable "AWS_ACCESS_KEY" {}

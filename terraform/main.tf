@@ -126,7 +126,7 @@ module "ec2_security_group" {
 
 resource "aws_key_pair" "key_pair" {
   key_name   = "ec2_key_pair"
-  public_key = var.public_key
+  public_key = "${var.public_key == "" ? file("~/.ssh/ec2.pub") : var.public_key}"
 }
 module "rds_secret" {
   source = "./modules/secrets"
