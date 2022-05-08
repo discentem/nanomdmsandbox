@@ -99,7 +99,8 @@ module "ec2" {
   ami = "ami-0022f774911c1d690"
   instance_type = "t2.micro"
   vpc_security_group_ids = [module.ec2_security_group.security_group_id]
-  subnet_id = module.vpc.private_subnets[0]
+  subnet_id = module.vpc.public_subnets[0]
+  associate_public_ip_address = true
 }
 
 module "ec2_security_group" {
@@ -112,6 +113,15 @@ module "ec2_security_group" {
 
   ingress_cidr_blocks      = var.public_inbound_cidr_blocks_ipv4
   ingress_rules            = ["ssh-tcp"]
+
+  egress_with_cidr_blocks = [
+    {
+      from_port        = 0
+      to_port          = 0
+      protocol         = "-1"
+      cidr_blocks      = "0.0.0.0/0"
+    },
+  ]
 }
 
 resource "aws_key_pair" "key_pair" {
@@ -131,7 +141,7 @@ module "rds_secret" {
     MYSQL_USERNAME = module.rds.db_instance_username,
     MYSQL_PASSWORD = module.rds.db_instance_password,
     MYSQL_HOSTNAME = module.rds.db_instance_address,
-    MYSQL_DSN      = "${module.rds.db_instance_username}:${module.rds.db_instance_password}@tcp(${module.rds.db_instance_endpoint})/"
+    MYSQL_DSN      = "${module.rds.db_instance_username}:${module.rds.db_instance_password}@tcp(${module.rds.db_instance_endpoint})/nanomdm"
   }
   )
   # secret_string        = jsonencode({ MYSQL_USERNAME = module.rds.mysql_cluster_master_username, MYSQL_PASSWORD = module.rds.mysql_cluster_master_password})

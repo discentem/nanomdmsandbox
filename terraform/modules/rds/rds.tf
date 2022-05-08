@@ -23,7 +23,8 @@ module "rds_mysql" {
   identifier = "${var.app_name}-rds"
 
   engine            = "mysql"
-  engine_version    = "5.7.25"
+  # engine_version    = "5.7.25"
+  engine_version    = "8.0.19"
   instance_class    = "db.t3.micro"
   allocated_storage = 10
 
@@ -32,7 +33,7 @@ module "rds_mysql" {
   password = local.password
   port     = "3306"
 
-  publicly_accessible = true
+  publicly_accessible = false
 
   iam_database_authentication_enabled = true
 

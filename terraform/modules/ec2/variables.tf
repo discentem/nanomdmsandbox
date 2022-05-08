@@ -32,3 +32,9 @@ variable "subnet_id" {
   type        = string
   description = ""
 }
+
+variable "associate_public_ip_address" {
+  type        = bool
+  description = ""
+  default = false
+}
