@@ -32,6 +32,11 @@ ASSUME AWS ROLE locally
   - https://github.com/micromdm/nanomdm/blob/main/storage/mysql/schema.sql
   - `mysql -h ${RDS_HOST} -P 3306 -u ${USER_NAME} -p nanomdm < schema.sql`
 
+- Force the ECS service to re-deploy:
+  - `make ecs-update-service CLUSTER=production-nanomdm-cluster SERVICE=production`
+  - Adjust `CLUSTER` and `SERVICE` to match what you specified in Terraform app_variables.
+
+
 ### Destroying Terraform Infra
 
 > :warning: **You may have to manually delete some components of an RDS after running `terraform destroy`. See this [github issue](https://github.com/hashicorp/terraform-provider-aws/issues/4597#issuecomment-912910432) for more info.

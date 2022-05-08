@@ -119,6 +119,26 @@ tf-create-route53-and-ecr:
 .PHONY: tf-first-run # Runs tf-first-run
 tf-first-run: .check-args tf-create-route53-and-ecr build-containers-docker-compose # Runs tf-first-run
 
+
+.check-args-ecs-update-service: .check-args
+ifndef AWS_REGION
+	$(error AWS_REGION is not set. please use `make {XXX} AWS_REGION=<us-east-1,us-east-2, ...AWS_REGION>.`)
+endif
+ifndef AWS_ACCOUNT_ID
+	$(error AWS_ACCOUNT_ID is not set. please use `make {XXX} AWS_ACCOUNT_ID=<1234567890 ...AWS_ACCOUNT_ID>.`)
+endif
+ifndef CLUSTER
+	$(error CLUSTER is not set. please use `make {XXX} CLUSTER=<production-nanomdm-cluster>.`)
+endif
+ifndef SERVICE
+	$(error SERVICE is not set. please use `make {XXX} SERVICE=<production>.`)
+endif
+
+.PHONY: ecs-update-service # Force redeployment of ECS service
+ecs-update-service: .check-args-ecs-update-service
+	aws ecs update-service --cluster $(CLUSTER) --service $(SERVICE) --desired-count 1 --force-new-deployment --enable-execute-command
+
+
 # golang - cli
 #
 #
