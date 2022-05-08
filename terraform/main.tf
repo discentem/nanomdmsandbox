@@ -181,6 +181,8 @@ module "ecs_nanomdm" {
   container_definition_cpu = 512
   container_definition_memory = 1024
 
+  // SCEP TASKs //
+
   scep_container_image = "${module.scep_ecr.repository_url}:latest"
   scep_app_port        = 8080
 
@@ -199,23 +201,19 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
+  // NanoMDM TASKs //
+
   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}:latest"
   nanomdm_app_port        = 9000
 
   mysql_secrets_manager_arn = module.rds_secret.arn
   nanomdm_task_container_environment = {
-    # MYSQL_HOSTNAME = "nanomdm-rds.civ0hthv7lpj.us-east-1.rds.amazonaws.com"
     APP_NAME       = var.app_name
-    # [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
-    # ${module.rds.mysql_cluster_master_username}:${}@tcp(${module.rds.mysql_cluster_endpoint}:3306)/${module.rds.mysql_cluster_database_name}
-    # MYSQL_DSN      = "mysql:host=${module.rds.mysql_cluster_endpoint};dbname=databasename"
   }
 
   # nanomdm_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
   nanomdm_task_definition_cpu    = 128
   nanomdm_task_definition_memory = 256
-
-  # TODO: Fix this or OSS recommend a /health API
   nanomdm_health_check = {
     port                = "traffic-port"
     path                = "/version"
@@ -227,14 +225,16 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
+  // Public CIDRs to allow access to the load balancers //
+
   public_inbound_cidr_blocks_ipv4 = var.public_inbound_cidr_blocks_ipv4
   public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
 
-  depends_on = [module.push_docker_images]
+  # depends_on = [module.push_docker_images]
 
 }
 
-module "push_docker_images" {
-  source     = "./modules/push_images"
-  depends_on = [module.nanomdm_ecr.repository_url, module.scep_ecr.repository_url]
-}
+# module "push_docker_images" {
+#   source     = "./modules/push_images"
+#   depends_on = [module.nanomdm_ecr.repository_url, module.scep_ecr.repository_url]
+# }

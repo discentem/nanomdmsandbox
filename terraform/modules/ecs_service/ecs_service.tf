@@ -13,6 +13,7 @@ locals {
   ]
 }
 
+// NanoMDM Task Definition //
 module "nanomdm" {
   source = "../../modules/ecs_task_definition"
 
@@ -76,6 +77,7 @@ module "nanomdm" {
   register_task_definition = false
 }
 
+// SCEP Task Definition //
 module "scep" {
  source = "../../modules/ecs_task_definition"
 
@@ -110,6 +112,7 @@ module "scep" {
 }
 
 
+// Combine all task definitions //
 module "merged" {
  source = "../../modules/ecs_task_definition//modules/merge"
 
@@ -119,6 +122,7 @@ module "merged" {
  ]
 }
 
+// Build the unified task definitions //
 resource "aws_ecs_task_definition" "task" {
   family                   = local.prefix_app_name
   execution_role_arn       = aws_iam_role.execution.arn
@@ -238,6 +242,8 @@ resource "aws_ecs_service" "service" {
   #     target_group_arn = aws_lb_target_group.task[lookup(load_balancer.value, "target_group_name")].arn
   #   }
   # }
+
+  // Load Balancers for NanoMDM and SCEP //
 
   load_balancer {
     target_group_arn = aws_alb_target_group.nanomdm.arn
