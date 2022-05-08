@@ -14,15 +14,23 @@
 
 ASSUME AWS ROLE locally
 
-- tfenv use 1.1.9
-- export AWS_PROFILE={INSERT AWS_PROFILE_NAME HERE}
-- export AWS_ACCOUNT_ID={INSERT ACCOUNT ID HERE}
-- export AWS_PROFILE={INSERT PROFILE HERE}
-- make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
-- Point domain at your nameservers that were just created
+- `tfenv use 1.1.9`
+- `export AWS_PROFILE={INSERT AWS_PROFILE_NAME HERE}`
+- `export AWS_ACCOUNT_ID={INSERT ACCOUNT ID HERE}`
+- `export AWS_PROFILE={INSERT PROFILE HERE}`
+- `make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION`
+- Point domain at your nameservers that were just created - this is external to AWS
 - WAIT FOR DNS PROPAGATION
-- make tf-plan
-- make tf-apply
+- `make tf-plan`
+- `make tf-apply`
+
+- Prep work to make RDS work with the nanomdm containers
+- Within RDS --> create the initial database, we used a default database called: `nanomdm`
+  - `mysql -h ${RDS_HOST} -P 3306 -u ${USER_NAME} -p`
+  - `CREATE database nanomdm;`
+- You can use the provided EC2 instance or some other way to upload the base SQL schema to the newly created RDS or your own RDS instance
+  - https://github.com/micromdm/nanomdm/blob/main/storage/mysql/schema.sql
+  - `mysql -h ${RDS_HOST} -P 3306 -u ${USER_NAME} -p nanomdm < schema.sql`
 
 ### Destroying Terraform Infra
 
