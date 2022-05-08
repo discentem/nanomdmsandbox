@@ -1,15 +1,46 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	mysql "github.com/go-sql-driver/mysql"
+	"github.com/groob/plist"
 	"github.com/manifoldco/promptui"
 	"github.com/pkg/errors"
 )
 
+var (
+	genEnrollment bool
+)
+
+func init() {
+	flag.BoolVar(&genEnrollment, "generate_enrollment", false, "generate enrollment profile")
+}
+
 func main() {
+	flag.Parse()
+	if genEnrollment {
+		profile, err := EnrollmentProfile(
+			"mdm.mdm.bkurtz.cloud/enroll",
+			"place",
+			"",
+			"ThisIsAChallenge",
+			"/Users/brandon_kurtz/nanomdm_push_cert.pem")
+		if err != nil {
+			log.Fatal(err)
+		}
+		b, err := plist.Marshal(profile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(b))
+		os.Exit(1)
+	}
+
 	hostname := "nanomdm-rds.civ0hthv7lpj.us-east-1.rds.amazonaws.com"
 
 	prompt := promptui.Prompt{
