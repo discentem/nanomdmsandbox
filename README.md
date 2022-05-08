@@ -8,11 +8,8 @@
     - cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
     - cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
     - Fill in secrets
-      - CIDR BLOCKS
-      - root domain name 
-      - 
-
-ASSUME AWS ROLE locally
+      1. ipv4 CIDR BLOCKS
+      1. root domain name 
 
 - `tfenv use 1.1.9`
 - `export AWS_PROFILE={INSERT AWS_PROFILE_NAME HERE}`
@@ -34,7 +31,18 @@ ASSUME AWS ROLE locally
 
 - Force the ECS service to re-deploy:
   - `make ecs-update-service CLUSTER=production-nanomdm-cluster SERVICE=production`
-  - Adjust `CLUSTER` and `SERVICE` to match what you specified in Terraform app_variables.
+  - Adjust `CLUSTER` and `SERVICE` to match what you specified in Terraform app_variables
+
+## Adding new containers
+
+- ecr repo
+- update `make tf-first-run` to include this new ecr repo
+- ecs service definition
+- target group for new service
+- add load balancer to service
+- update main.tf (write variables at each layer)
+- listeners <---> target groups
+- 
 
 
 ### Destroying Terraform Infra
