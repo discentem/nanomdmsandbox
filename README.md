@@ -14,7 +14,6 @@
 - `tfenv use 1.1.9`
 - `export AWS_PROFILE={INSERT AWS_PROFILE_NAME HERE}`
 - `export AWS_ACCOUNT_ID={INSERT ACCOUNT ID HERE}`
-- `export AWS_PROFILE={INSERT PROFILE HERE}`
 - `make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION`
 - Point domain at your nameservers that were just created - this is external to AWS
 - WAIT FOR DNS PROPAGATION
@@ -84,16 +83,3 @@ From root of this project:
 ```shell
 sudo salt-call --local state.apply --file-root salt/salt --pillar-root salt/pillar --log-level info -c ${PWD}/salt
 ```
-
-# Micromdm architecture
-
-- micromdm binary. Provides TLS + SCEP + mdm server API.
-    - when devices check-in or have some other event, micromdm sends these events to it's own webhook.
-    - Some other service (such as mdmdirector) can listen to the webhook and take actions based on the events.
-
-# Nano Architecture
-
-- nanomdm binary. Provides only an mdm server API.
-    - when devices check-in or have some other event, nanomdm sends these events to its own webhook.
-    - some other service can listen to the webhook and take actions based on the events.
-- You need to bring your own TLS via reverse proxy/load balancer
