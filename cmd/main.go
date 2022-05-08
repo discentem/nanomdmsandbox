@@ -25,7 +25,7 @@ func main() {
 	flag.Parse()
 	if genEnrollment {
 		profile, err := EnrollmentProfile(
-			"mdm.mdm.bkurtz.cloud/enroll",
+			"https://mdm-infra.mdm.bkurtz.cloud",
 			"place",
 			"",
 			"ThisIsAChallenge",
@@ -37,7 +37,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = os.WriteFile("enrollment.mobileconfig", b, 0500)
+		err = os.WriteFile("enrollment.mobileconfig", b, 0755)
 		if err != nil {
 			log.Fatal(err)
 		}

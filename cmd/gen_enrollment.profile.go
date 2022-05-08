@@ -79,7 +79,7 @@ func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 	mdmPayloadContent := enroll.MDMPayloadContent{
 		Payload:             *mdmPayload,
 		AccessRights:        allRights(),
-		CheckInURL:          "/mdm",
+		CheckInURL:          fmt.Sprintf("%s/mdm", opts.serverURL),
 		CheckOutWhenRemoved: true,
 		ServerURL:           opts.serverURL,
 		Topic:               opts.topic,
