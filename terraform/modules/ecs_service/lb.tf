@@ -2,7 +2,6 @@ resource "aws_alb" "lb" {
   name            = local.prefix_app_name
   subnets         = var.public_subnet_ids
   load_balancer_type = "application"
-  # certificate_arn = var.certificate_arn
   security_groups = [aws_security_group.lb.id]
 }
 
@@ -18,22 +17,15 @@ resource "aws_route53_record" "this" {
   }
 }
 
+// Create target groups for each service //
+
+// SCEP target group //
 resource "aws_alb_target_group" "scep" {
   name        = "${local.prefix_app_name}-scep-tg"
   port        = var.scep_app_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
-
-  # health_check {
-  #   healthy_threshold   = "3"
-  #   interval            = "30"
-  #   protocol            = "HTTP"
-  #   matcher             = "200"
-  #   timeout             = "3"
-  #   path                = var.health_check_path
-  #   unhealthy_threshold = "2"
-  # }
 
   dynamic "health_check" {
     for_each = [var.scep_health_check]
@@ -51,6 +43,7 @@ resource "aws_alb_target_group" "scep" {
   }
 }
 
+// NanoMDM target group //
 resource "aws_alb_target_group" "nanomdm" {
   name        = "${local.prefix_app_name}-nanomdm-tg"
   port        = var.nanomdm_app_port
@@ -96,6 +89,7 @@ resource "aws_alb_target_group" "nanomdm" {
 #   }
 # }
 
+// Attach all application target groups to the listeners //
 resource "aws_alb_listener" "https" {
   load_balancer_arn = aws_alb.lb.id
   port              = "443"

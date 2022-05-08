@@ -87,7 +87,52 @@ module "rds" {
   allowed_cidr_blocks = module.vpc.private_subnets_cidr_blocks
   
   create_db_instance  = true
-  create_random_password = true
+
+  password = random_password.mysql_rds_master_password.result
+}
+
+resource "random_password" "mysql_rds_master_password" {
+  length  = "20"
+  special = false
+}
+
+module "ec2" {
+  source = "./modules/ec2"
+
+  app_name = var.app_name
+  name = "ec2"
+  key_name = aws_key_pair.key_pair.key_name
+  ami = "ami-0022f774911c1d690"
+  instance_type = "t2.micro"
+  vpc_security_group_ids = [module.ec2_security_group.security_group_id]
+  subnet_id = module.vpc.public_subnets[0]
+  associate_public_ip_address = true
+}
+
+module "ec2_security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 4.9.0"
+
+  name        = "${var.app_name}-ec2"
+  description = "${var.app_name}-ec2 security group"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks      = var.public_inbound_cidr_blocks_ipv4
+  ingress_rules            = ["ssh-tcp"]
+
+  egress_with_cidr_blocks = [
+    {
+      from_port        = 0
+      to_port          = 0
+      protocol         = "-1"
+      cidr_blocks      = "0.0.0.0/0"
+    },
+  ]
+}
+
+resource "aws_key_pair" "key_pair" {
+  key_name   = "ec2_key_pair"
+  public_key = "${var.public_key == "" ? file("~/.ssh/ec2.pub") : var.public_key}"
 }
 module "rds_secret" {
   source = "./modules/secrets"
@@ -102,7 +147,7 @@ module "rds_secret" {
     MYSQL_USERNAME = module.rds.db_instance_username,
     MYSQL_PASSWORD = module.rds.db_instance_password,
     MYSQL_HOSTNAME = module.rds.db_instance_address,
-    MYSQL_DSN      = "${module.rds.db_instance_username}:${module.rds.db_instance_password}@tcp(${module.rds.db_instance_endpoint})/"
+    MYSQL_DSN      = "${module.rds.db_instance_username}:${random_password.mysql_rds_master_password.result}@tcp(${module.rds.db_instance_endpoint})/nanomdm"
   }
   )
   # secret_string        = jsonencode({ MYSQL_USERNAME = module.rds.mysql_cluster_master_username, MYSQL_PASSWORD = module.rds.mysql_cluster_master_password})
@@ -136,6 +181,8 @@ module "ecs_nanomdm" {
   container_definition_cpu = 512
   container_definition_memory = 1024
 
+  // SCEP TASKs //
+
   scep_container_image = "${module.scep_ecr.repository_url}:latest"
   scep_app_port        = 8080
 
@@ -154,23 +201,19 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
+  // NanoMDM TASKs //
+
   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}:latest"
   nanomdm_app_port        = 9000
 
   mysql_secrets_manager_arn = module.rds_secret.arn
   nanomdm_task_container_environment = {
-    # MYSQL_HOSTNAME = "nanomdm-rds.civ0hthv7lpj.us-east-1.rds.amazonaws.com"
     APP_NAME       = var.app_name
-    # [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
-    # ${module.rds.mysql_cluster_master_username}:${}@tcp(${module.rds.mysql_cluster_endpoint}:3306)/${module.rds.mysql_cluster_database_name}
-    # MYSQL_DSN      = "mysql:host=${module.rds.mysql_cluster_endpoint};dbname=databasename"
   }
 
   # nanomdm_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
   nanomdm_task_definition_cpu    = 128
   nanomdm_task_definition_memory = 256
-
-  # TODO: Fix this or OSS recommend a /health API
   nanomdm_health_check = {
     port                = "traffic-port"
     path                = "/version"
@@ -182,14 +225,16 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
+  // Public CIDRs to allow access to the load balancers //
+
   public_inbound_cidr_blocks_ipv4 = var.public_inbound_cidr_blocks_ipv4
   public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
 
-  depends_on = [module.push_docker_images]
+  # depends_on = [module.push_docker_images]
 
 }
 
-module "push_docker_images" {
-  source     = "./modules/push_images"
-  depends_on = [module.nanomdm_ecr.repository_url, module.scep_ecr.repository_url]
-}
+# module "push_docker_images" {
+#   source     = "./modules/push_images"
+#   depends_on = [module.nanomdm_ecr.repository_url, module.scep_ecr.repository_url]
+# }

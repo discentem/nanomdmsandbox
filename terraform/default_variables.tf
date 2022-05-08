@@ -93,5 +93,12 @@ variable "public_inbound_cidr_blocks_ipv6" {
   # default = ["::/0"]
 }
 
+variable "public_key" {
+  type = string
+  description = "ec2 key pair public key material"
+  sensitive = true
+  default = ""
+}
+
 # variable "AWS_ACCESS_KEY" {}
 # variable "AWS_SECRET_KEY" {}
