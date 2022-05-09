@@ -30,3 +30,5 @@ cmd/cmd
 
 # mdm
 app/enrollment.mobileconfig
+
+*.mobileconfig
