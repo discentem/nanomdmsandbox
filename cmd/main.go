@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/discentem/nanomdmsandbox/pkg/enrollment"
+
 	mysql "github.com/go-sql-driver/mysql"
 	"github.com/groob/plist"
 	"github.com/manifoldco/promptui"
@@ -24,7 +26,7 @@ func init() {
 func main() {
 	flag.Parse()
 	if genEnrollment {
-		profile, err := EnrollmentProfile(
+		profile, err := enrollment.EnrollmentProfile(
 			"https://mdm-infra.mdm.bkurtz.cloud",
 			"place",
 			"",

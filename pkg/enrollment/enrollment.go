@@ -1,10 +1,11 @@
-package main
+package enrollment
 
 import (
 	"crypto/x509"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/micromdm/micromdm/mdm/enroll"
 	"github.com/micromdm/nanomdm/cryptoutil"
@@ -91,7 +92,7 @@ func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 
 	payloadContent := []interface{}{}
 	scepContent := enroll.SCEPPayloadContent{
-		URL:      fmt.Sprintf("%s/scep", opts.serverURL),
+		URL:      strings.ReplaceAll(fmt.Sprintf("%s:8080/scep", opts.serverURL), "https", "http"),
 		Keysize:  2048,
 		KeyType:  "RSA",
 		KeyUsage: int(x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment),
