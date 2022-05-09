@@ -9,6 +9,7 @@ import (
 
 	"github.com/discentem/nanomdmsandbox/pkg/enrollment"
 
+	"github.com/discentem/nanomdmsandbox/pkg/env"
 	mysql "github.com/go-sql-driver/mysql"
 	"github.com/groob/plist"
 	"github.com/manifoldco/promptui"
@@ -17,21 +18,32 @@ import (
 
 var (
 	genEnrollment bool
+	baseMDMURL    string
+	company       string
+	scepChallenge string
+	pathToPem     string
 )
 
 func init() {
 	flag.BoolVar(&genEnrollment, "generate_enrollment", false, "generate enrollment profile")
+	flag.StringVar(&baseMDMURL, "base_url", env.String("NANOMDM_BASE_URL", ""), "base mdm url")
+	flag.StringVar(&company, "company", env.String("NANOMDM_COMPANY", ""), "company name")
+	flag.StringVar(&scepChallenge, "scep_challenge", env.String("NANOMDM_SCEP_CHALLENGE", ""), "the challenge password matching your scep server")
+	flag.StringVar(&pathToPem, "path_to_pem", env.String("NANOMDM_PUSH_PEM", ""), "output path for mobileconfig")
+
 }
 
 func main() {
 	flag.Parse()
 	if genEnrollment {
+		if pathToPem == "" {
+			log.Fatal("pathToPem cannot be ")
+		}
 		profile, err := enrollment.EnrollmentProfile(
-			"https://mdm-infra.mdm.bkurtz.cloud",
-			"place",
-			"",
-			"ThisIsAChallenge",
-			"/Users/brandon_kurtz/nanomdm_push_cert.pem")
+			baseMDMURL,
+			company,
+			scepChallenge,
+			pathToPem)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -39,7 +51,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = os.WriteFile("enrollment.mobileconfig", b, 0755)
+		err = os.WriteFile("app/enrollment.mobileconfig", b, 0755)
 		if err != nil {
 			log.Fatal(err)
 		}
