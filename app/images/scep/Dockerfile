@@ -9,6 +9,9 @@ ENV SCEP_VERSION $SCEP_VERSION
 ARG CHALLENGE
 ENV CHALLENGE $CHALLENGE
 
+ARG ALLOW_RENEW
+ENV ALLOW_RENEW $ALLOW_RENEW
+
 WORKDIR /service/scep
 
 COPY ../../config/certs/depot /service/scep/depot
@@ -18,4 +21,4 @@ RUN curl -RLO https://github.com/micromdm/scep/releases/download/v$SCEP_VERSION/
 RUN unzip scepserver-linux-amd64-v$SCEP_VERSION.zip
 
 EXPOSE 8080
-CMD ./scepserver-linux-amd64 -depot depot -port 8080 -challenge=$CHALLENGE
+CMD ./scepserver-linux-amd64 -depot depot -port 8080 -challenge=$CHALLENGE -allowrenew $ALLOW_RENEW
