@@ -33,36 +33,33 @@ const bootstrapToken = "com.apple.mdm.bootstraptoken"
 type EnrollmentOpts struct {
 	serverURL     string
 	company       string
-	topic         string
 	scepChallenge string
+	topic         string
 	pathToPem     string
 }
 
-func EnrollmentProfile(serverURL, company, topic, scepChallenge, pathToPem string) (*enroll.Profile, error) {
+func EnrollmentProfile(serverURL, company, scepChallenge, pathToPem string) (*enroll.Profile, error) {
 	return EnrollmentOpts{
 		serverURL:     serverURL,
 		company:       company,
-		topic:         topic,
 		scepChallenge: scepChallenge,
 		pathToPem:     pathToPem,
 	}.EnrollmentProfile()
 }
 
 func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
-	if opts.topic == "" {
-		if opts.pathToPem == "" {
-			return nil, errors.New("topic is empty string, so opts.pathToPem is expected")
-		}
-		b, err := ioutil.ReadFile(opts.pathToPem)
-		if err != nil {
-			return nil, err
-		}
-		opts.topic, err = cryptoutil.TopicFromPEMCert(b)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println(opts.topic)
+	if opts.pathToPem == "" {
+		return nil, errors.New("opts.pathToPem must be provided")
 	}
+	b, err := ioutil.ReadFile(opts.pathToPem)
+	if err != nil {
+		return nil, err
+	}
+	opts.topic, err = cryptoutil.TopicFromPEMCert(b)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(opts.topic)
 
 	profile := enroll.NewProfile()
 	profile.PayloadIdentifier = fmt.Sprintf("com.%s.nanomdm.scep", opts.company)

@@ -29,4 +29,6 @@ build
 cmd/cmd
 
 # mdm
-cmd/enrollment.mobileconfig
+app/enrollment.mobileconfig
+
+*.mobileconfig
