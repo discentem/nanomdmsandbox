@@ -22,8 +22,7 @@
     - The default nanomdm container username/password combination is: nanomdm:nanomdm
 
 
-#### Testing this end to end
-- 
+####
 
 
 - `brew install tfenv`
