@@ -90,7 +90,7 @@ resource "aws_alb_listener_rule" "nanomdm" {
   }
 }
 
-resource "aws_alb_listener_rule" "nanomdm" {
+resource "aws_alb_listener_rule" "scep" {
   listener_arn = aws_alb_listener.https.arn
   priority     = 100
 
