@@ -21,9 +21,10 @@ resource "aws_route53_record" "this" {
 
 // SCEP target group //
 resource "aws_alb_target_group" "scep" {
-  name        = "${local.prefix_app_name}-scep-tg"
+  name_prefix = "sceptg"
+  # name        = "${local.prefix_app_name}-scep-tg"
   port        = var.scep_app_port
-  protocol    = "HTTPS"
+  protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
 
@@ -41,13 +42,17 @@ resource "aws_alb_target_group" "scep" {
       matcher             = lookup(health_check.value, "matcher", null)
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // NanoMDM target group //
 resource "aws_alb_target_group" "nanomdm" {
-  name        = "${local.prefix_app_name}-nanomdm-tg"
+  name_prefix = "nanotg"
+  # name        = "${local.prefix_app_name}-nanomdm-tg"
   port        = var.nanomdm_app_port
-  protocol    = "HTTPS"
+  protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
 
@@ -65,11 +70,14 @@ resource "aws_alb_target_group" "nanomdm" {
       matcher             = lookup(health_check.value, "matcher", null)
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_alb_listener_rule" "nanomdm" {
   listener_arn = aws_alb_listener.https.arn
-  priority     = 100
+  # priority     = 100
 
   action {
     type             = "forward"
@@ -83,16 +91,16 @@ resource "aws_alb_listener_rule" "nanomdm" {
     }
   }
 
-  condition {
-    host_header {
-      values = ["${var.lb_subdomain_name}.${var.domain_name}"]
-    }
-  }
+  # condition {
+  #   host_header {
+  #     values = ["${var.lb_subdomain_name}.${var.domain_name}"]
+  #   }
+  # }
 }
 
 resource "aws_alb_listener_rule" "scep" {
   listener_arn = aws_alb_listener.https.arn
-  priority     = 100
+  # priority     = 100
 
   action {
     type             = "forward"
@@ -105,11 +113,11 @@ resource "aws_alb_listener_rule" "scep" {
     }
   }
 
-  condition {
-    host_header {
-      values = ["${var.lb_subdomain_name}.${var.domain_name}"]
-    }
-  }
+  # condition {
+  #   host_header {
+  #     values = ["${var.lb_subdomain_name}.${var.domain_name}"]
+  #   }
+  # }
 }
 
 // Attach all application target groups to the listeners //
@@ -131,7 +139,7 @@ resource "aws_alb_listener" "https" {
 resource "aws_alb_listener" "scep_lb_listener" {
   load_balancer_arn = aws_alb.lb.id
   port              = var.scep_app_port
-  protocol          = "HTTPS"
+  protocol          = "HTTP"
 
   default_action {
     target_group_arn = aws_alb_target_group.scep.arn
@@ -142,7 +150,7 @@ resource "aws_alb_listener" "scep_lb_listener" {
 resource "aws_alb_listener" "nanomdm_lb_listener" {
   load_balancer_arn = aws_alb.lb.id
   port              = var.nanomdm_app_port
-  protocol          = "HTTPS"
+  protocol          = "HTTP"
 
   default_action {
     target_group_arn = aws_alb_target_group.nanomdm.arn
