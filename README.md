@@ -13,7 +13,7 @@
     - The following files should have been generated and an email with your encrypted CSR will be attached.
       - `mdmcert.download.pki.{crt|key}` --> These are generated for handling the decryption fo mdmcert.download
       - `mdmcert.download.push.{csr|key}` --> These are for the Apple Identity Portal
-  4. Decrypt the into the `mdmcert.download.key`
+  4. Decrypt the downloaded CSR from the email into the `mdmcert.download.key`
     - `mdmctl mdmcert.download -decrypt=~/Downloads/mdm_signed_request.20171122_094910_220.plist.b64.p7`
   5. Upload the decrypted CSR push certificate `mdmcert.download.push.req` request to Apple
     - `https://identity.apple.com`
