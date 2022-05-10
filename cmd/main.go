@@ -37,7 +37,7 @@ func main() {
 	flag.Parse()
 	if genEnrollment {
 		if pathToPem == "" {
-			log.Fatal("pathToPem cannot be ")
+			log.Fatal("pathToPem cannot be empty")
 		}
 		profile, err := enrollment.EnrollmentProfile(
 			baseMDMURL,

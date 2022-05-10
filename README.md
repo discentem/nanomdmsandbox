@@ -1,8 +1,36 @@
 ## Quickstart
 
 - Buy a domain
-- brew install tfenv
-- tfenv install 1.1.9
+
+### Generating an APNS Certificate
+- > :Disclaimer: ** While the mdmcert.download is a great site that we have used for and highly recommended for development and testing purposes, this solution should NOT be used for production usage. You should apply directly to Apple to retrieve an APNS certificate for your corporate entity. Apple requires that you have an Enterprise Developer Account to generate this type of certificate. **
+- mdmcert.download generation instructions:
+  1. https://mdmcert.download/registration --> This must also be registered under a business domain account.
+  2. Download and build `mdmctl` from `github.com/micromdm/micromdm`
+    - You will only need to generate the `mdmctl` via `make mdmctl`
+  3. Generate the vendor certificate that will be uploaded to `mdmcert.download`
+    - `mdmctl mdmcert.download -new -email=cool.mdm.admin@example.org`
+    - The following files should have been generated and an email with your encrypted CSR will be attached.
+      - `mdmcert.download.pki.{crt|key}` --> These are generated for handling the decryption fo mdmcert.download
+      - `mdmcert.download.push.{csr|key}` --> These are for the Apple Identity Portal
+  4. Decrypt the downloaded CSR from the email into the `mdmcert.download.key`
+    - `mdmctl mdmcert.download -decrypt=~/Downloads/mdm_signed_request.20171122_094910_220.plist.b64.p7`
+  5. Upload the decrypted CSR push certificate `mdmcert.download.push.req` request to Apple
+    - `https://identity.apple.com`
+  6. Upload to the nanomdm instance once the infrastructure is build:
+    - `cat ./push_certificate.pem ./mdmcert.download.push.key | curl -T - -u ${USERNAME}:${PASSWORD} 'https://mdm.us-east-1.example.com/v1/pushcert'`
+    - The default nanomdm container username/password combination is: nanomdm:nanomdm
+
+
+####
+
+
+- `brew install tfenv`
+- Generate SCEP default CA files which outputs to a `depot` folder. This is required for the SCEP and NanoMDM containers
+  - `https://github.com/micromdm/scep/releases/download/v2.1.0/scepserver-darwin-amd64-v2.1.0.zip`
+  - `./scepserver-darwin-amd64 ca -init`
+  - Save this `depot` folder within `app/config/certs/depot`
+- `tfenv install 1.1.9`
 - <INSTRUCTIONS FOR GENERATING IAM KEYS>
 - create terraform variable files
     - cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json

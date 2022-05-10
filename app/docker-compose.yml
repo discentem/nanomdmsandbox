@@ -12,6 +12,7 @@ services:
       args:
         - SCEP_VERSION=2.1.0
         - CHALLENGE=ThisIsAChallenge
+        - ALLOW_RENEW=0
     ports:
       - "8080:8080"
 

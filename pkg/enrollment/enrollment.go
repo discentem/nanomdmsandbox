@@ -48,6 +48,7 @@ func EnrollmentProfile(serverURL, company, scepChallenge, pathToPem string) (*en
 }
 
 func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
+	fmt.Println(opts)
 	if opts.pathToPem == "" {
 		return nil, errors.New("opts.pathToPem must be provided")
 	}
@@ -79,7 +80,7 @@ func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 		AccessRights:        allRights(),
 		CheckInURL:          fmt.Sprintf("%s/mdm", opts.serverURL),
 		CheckOutWhenRemoved: true,
-		ServerURL:           opts.serverURL,
+		ServerURL:           fmt.Sprintf("%s/mdm", opts.serverURL),
 		Topic:               opts.topic,
 		SignMessage:         true,
 		ServerCapabilities: []string{
@@ -88,8 +89,11 @@ func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 	}
 
 	payloadContent := []interface{}{}
+	fmt.Println("opts.serverURL", opts.serverURL)
+	scepURL := strings.ReplaceAll(fmt.Sprintf("%s:8080/scep", opts.serverURL), "https", "http")
+	fmt.Println("scepURL", scepURL)
 	scepContent := enroll.SCEPPayloadContent{
-		URL:      strings.ReplaceAll(fmt.Sprintf("%s:8080/scep", opts.serverURL), "https", "http"),
+		URL:      scepURL,
 		Keysize:  2048,
 		KeyType:  "RSA",
 		KeyUsage: int(x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment),
