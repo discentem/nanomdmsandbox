@@ -23,6 +23,12 @@ module "scep_ecr" {
   image_tag_mutability = var.image_tag_mutability
 }
 
+module "micro2nano" {
+  source               = "./modules/ecr"
+  repository_name      = var.micro2nano_repository_name
+  image_tag_mutability = var.image_tag_mutability
+}
+
 module "route53" {
   source      = "./modules/route53"
   domain_name = var.domain_name
