@@ -138,39 +138,10 @@ module "micro2nano" {
   }
 
 
+  environment = local.task_environment
 
-#     "logConfiguration": {
-#       "logDriver": "awslogs",
-#       "options": {
-#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
-#         "awslogs-region": "${data.aws_region.current.name}",
-#         "awslogs-stream-prefix": "ecs"
-#       }
-#     },
-
-  secrets = [
-    {
-      "name": "MYSQL_PASSWORD",
-      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_PASSWORD::"
-    },
-    {
-      "name": "MYSQL_USERNAME",
-      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_USERNAME::"
-    },
-    {
-      "name": "MYSQL_HOSTNAME",
-      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_HOSTNAME::"
-    },
-    {
-      "name": "MYSQL_DSN",
-      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_DSN::"
-    }
-  ]
-
-  environment = local.nanomdm_task_environment
-
-  memory = var.nanomdm_task_definition_memory
-  cpu    = var.nanomdm_task_definition_cpu
+  memory = var.micro2nano_task_definition_memory
+  cpu    = var.micro2nano_task_definition_cpu
 
   register_task_definition = false
 }
@@ -183,6 +154,7 @@ module "merged" {
  container_definitions = [
    "${module.nanomdm.container_definitions}",
    "${module.scep.container_definitions}",
+   "${module.micro2nano.container_definitions}"
  ]
 }
 
