@@ -111,6 +111,70 @@ module "scep" {
   register_task_definition = false
 }
 
+// micro2nano Task Definition //
+module "micro2nano" {
+  source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-micro2nano"
+
+  image     = "${var.micro2nano_container_image}"
+  essential = true
+
+  portMappings = [
+    {
+      containerPort =  var.nanomdm_app_port
+      hostPort = var.nanomdm_app_port
+      protocol = "tcp"
+    },
+  ]
+
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+
+
+#     "logConfiguration": {
+#       "logDriver": "awslogs",
+#       "options": {
+#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
+#         "awslogs-region": "${data.aws_region.current.name}",
+#         "awslogs-stream-prefix": "ecs"
+#       }
+#     },
+
+  secrets = [
+    {
+      "name": "MYSQL_PASSWORD",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_PASSWORD::"
+    },
+    {
+      "name": "MYSQL_USERNAME",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_USERNAME::"
+    },
+    {
+      "name": "MYSQL_HOSTNAME",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_HOSTNAME::"
+    },
+    {
+      "name": "MYSQL_DSN",
+      "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_DSN::"
+    }
+  ]
+
+  environment = local.nanomdm_task_environment
+
+  memory = var.nanomdm_task_definition_memory
+  cpu    = var.nanomdm_task_definition_cpu
+
+  register_task_definition = false
+}
+
 
 // Combine all task definitions //
 module "merged" {

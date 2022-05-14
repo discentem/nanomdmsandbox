@@ -44,7 +44,6 @@ variable "container_definition_memory" {
   default     = null
   type        = number
 }
-
 variable "scep_container_image" {
   description = "The SCEP image used to start a container."
   type        = string
@@ -74,7 +73,7 @@ variable "nanomdm_container_image" {
 }
 
 variable "nanomdm_app_port" {
-  description = "The SCEP app port used for the container."
+  description = "The nanomdm app port used for the container."
   type        = number
   default     = 9000
 }
@@ -92,6 +91,35 @@ variable "nanomdm_task_definition_memory" {
 }
 
 variable "nanomdm_task_container_environment" {
+  description = "The environment variables to pass to a container."
+  default     = {}
+  type        = map(string)
+}
+
+variable "micro2nano_container_image" {
+  description = "The micro2nano image used to start a container."
+  type        = string
+}
+
+variable "micro2nano_app_port" {
+  description = "The micro2nano app port used for the container."
+  type        = number
+  default     = 9001
+}
+
+variable "micro2nano_task_definition_cpu" {
+  description = "Amount of CPU to reserve for the task."
+  default     = 256
+  type        = number
+}
+
+variable "micro2nano_task_definition_memory" {
+  description = "The soft limit (in MiB) of memory to reserve for the task."
+  default     = 512
+  type        = number
+}
+
+variable "micro2nano_task_container_environment" {
   description = "The environment variables to pass to a container."
   default     = {}
   type        = map(string)
