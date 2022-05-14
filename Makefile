@@ -57,6 +57,7 @@ help:
 # Build and Push All Platform Containers
 # ------------------------------------------------------------------------------
 .PHONY: build-containers-docker-compose # Build all containers and publish the containers to AWS ECR
+
 build-containers-docker-compose: DOCKER_BUILDKIT=1
 build-containers-docker-compose: COMPOSE_DOCKER_CLI_BUILD=1
 build-containers-docker-compose: .check-args
@@ -70,6 +71,7 @@ build-containers-docker-compose: .check-args
 		docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$$container:latest ; \
 	done
 
+.PHONY: docker-compose # Build all containers and publish the containers to AWS ECR
 docker-compose: build-containers-docker-compose
 
 # terraform deploy
