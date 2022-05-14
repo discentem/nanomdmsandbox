@@ -196,6 +196,11 @@ variable "nanomdm_health_check" {
   type        = map(string)
 }
 
+variable "micro2nano_health_check" {
+  description = "A health block containing health check settings for the target group. Overrides the defaults."
+  type        = map(string)
+}
+
 variable "health_check_grace_period_seconds" {
   default     = 300
   description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 7200. Only valid for services configured to use load balancers."

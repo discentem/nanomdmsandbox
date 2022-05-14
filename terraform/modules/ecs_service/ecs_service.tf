@@ -293,6 +293,13 @@ resource "aws_ecs_service" "service" {
     container_port   = var.scep_app_port
   }
 
+  load_balancer {
+    target_group_arn = aws_alb_target_group.micro2nano.arn
+    container_name   = "${var.app_name}-micro2nano"
+    container_port   = var.micro2nano_app_port
+  }
+
+
   deployment_controller {
     type = var.deployment_controller_type
   }
