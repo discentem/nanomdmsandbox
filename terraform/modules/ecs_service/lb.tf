@@ -21,7 +21,8 @@ resource "aws_route53_record" "this" {
 
 // SCEP target group //
 resource "aws_alb_target_group" "scep" {
-  name        = "${local.prefix_app_name}-scep-tg"
+  name_prefix = "sceptg"
+  # name        = "${local.prefix_app_name}-scep-tg"
   port        = var.scep_app_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -41,11 +42,15 @@ resource "aws_alb_target_group" "scep" {
       matcher             = lookup(health_check.value, "matcher", null)
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // NanoMDM target group //
 resource "aws_alb_target_group" "nanomdm" {
-  name        = "${local.prefix_app_name}-nanomdm-tg"
+  name_prefix = "nanotg"
+  # name        = "${local.prefix_app_name}-nanomdm-tg"
   port        = var.nanomdm_app_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -65,29 +70,55 @@ resource "aws_alb_target_group" "nanomdm" {
       matcher             = lookup(health_check.value, "matcher", null)
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-# resource "aws_lb_listener_rule" "static" {
-#   listener_arn = aws_lb_listener.front_end.arn
-#   priority     = 100
+resource "aws_alb_listener_rule" "nanomdm" {
+  listener_arn = aws_alb_listener.https.arn
+  # priority     = 100
 
-#   action {
-#     type             = "forward"
-#     target_group_arn = aws_lb_target_group.static.arn
-#   }
+  action {
+    type             = "forward"
+    # target_group_arn = aws_lb_target_group.static.arn
+    target_group_arn = aws_alb_target_group.nanomdm.arn
+  }
 
-#   condition {
-#     path_pattern {
-#       values = ["/static/*"]
-#     }
-#   }
+  condition {
+    path_pattern {
+      values = ["/version", "/v1/pushcert", "/v1/push/*", "/v1/enqueue/*"]
+    }
+  }
 
-#   condition {
-#     host_header {
-#       values = ["example.com"]
-#     }
-#   }
-# }
+  # condition {
+  #   host_header {
+  #     values = ["${var.lb_subdomain_name}.${var.domain_name}"]
+  #   }
+  # }
+}
+
+resource "aws_alb_listener_rule" "scep" {
+  listener_arn = aws_alb_listener.https.arn
+  # priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.scep.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/scep", "/scep/*", "/scep*"]
+    }
+  }
+
+  # condition {
+  #   host_header {
+  #     values = ["${var.lb_subdomain_name}.${var.domain_name}"]
+  #   }
+  # }
+}
 
 // Attach all application target groups to the listeners //
 resource "aws_alb_listener" "https" {
