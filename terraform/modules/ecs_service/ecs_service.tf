@@ -122,8 +122,8 @@ module "micro2nano" {
 
   portMappings = [
     {
-      containerPort =  var.nanomdm_app_port
-      hostPort = var.nanomdm_app_port
+      containerPort =  var.micro2nano_app_port
+      hostPort = var.micro2nano_app_port
       protocol = "tcp"
     },
   ]
