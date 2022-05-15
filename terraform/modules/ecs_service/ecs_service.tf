@@ -111,6 +111,41 @@ module "scep" {
   register_task_definition = false
 }
 
+// micro2nano Task Definition //
+module "micro2nano" {
+  source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-micro2nano"
+
+  image     = "${var.micro2nano_container_image}"
+  essential = true
+
+  portMappings = [
+    {
+      containerPort =  var.micro2nano_app_port
+      hostPort = var.micro2nano_app_port
+      protocol = "tcp"
+    },
+  ]
+
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+
+  environment = local.task_environment
+
+  memory = var.micro2nano_task_definition_memory
+  cpu    = var.micro2nano_task_definition_cpu
+
+  register_task_definition = false
+}
+
 
 // Combine all task definitions //
 module "merged" {
@@ -119,6 +154,7 @@ module "merged" {
  container_definitions = [
    "${module.nanomdm.container_definitions}",
    "${module.scep.container_definitions}",
+   "${module.micro2nano.container_definitions}"
  ]
 }
 
@@ -256,6 +292,13 @@ resource "aws_ecs_service" "service" {
     container_name   = "${var.app_name}-scep"
     container_port   = var.scep_app_port
   }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.micro2nano.arn
+    container_name   = "${var.app_name}-micro2nano"
+    container_port   = var.micro2nano_app_port
+  }
+
 
   deployment_controller {
     type = var.deployment_controller_type

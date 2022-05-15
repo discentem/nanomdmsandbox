@@ -32,3 +32,19 @@ services:
 
     depends_on:
       - scep
+  micro2nano:
+    image: micro2nano
+    # image: <my account>.dkr.ecr.<my region>.amazonaws.com/akff-web
+    build:
+      context: .
+      dockerfile: ./images/micro2nano/Dockerfile
+      args:
+        - VERSION=0.2.0
+        - API_KEY=nanomdm
+        - NANO_API_KEY=nanomdm
+        - NANO_URL=http://127.0.0.1:9000/v1/enqueue
+    ports:
+      - "9001:9001"
+    depends_on:
+      - nanomdm
+

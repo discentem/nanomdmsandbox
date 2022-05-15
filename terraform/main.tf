@@ -23,6 +23,12 @@ module "scep_ecr" {
   image_tag_mutability = var.image_tag_mutability
 }
 
+module "micro2nano_ecr" {
+  source               = "./modules/ecr"
+  repository_name      = var.micro2nano_repository_name
+  image_tag_mutability = var.image_tag_mutability
+}
+
 module "route53" {
   source      = "./modules/route53"
   domain_name = var.domain_name
@@ -231,6 +237,24 @@ module "ecs_nanomdm" {
   public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
 
   # depends_on = [module.push_docker_images]
+
+  micro2nano_container_image = "${module.micro2nano_ecr.repository_url}:latest"
+  micro2nano_app_port        = 9001
+
+  # scep_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
+  micro2nano_task_definition_cpu    = 128
+  micro2nano_task_definition_memory = 256
+
+  micro2nano_health_check = {
+    port                = "traffic-port"
+    path                = "/v1/commands"
+    health_threshold    = "3"
+    interval            = "60"
+    protocol            = "HTTP"
+    matcher             = "401"
+    timeout             = "3"
+    unhealthy_threshold = "2"
+  }
 
 }
 

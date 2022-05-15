@@ -36,6 +36,15 @@ resource "aws_security_group" "lb" {
     # ipv6_cidr_blocks  = ["::/0"]
     # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
   }
+  
+  ingress {
+    from_port         = var.micro2nano_app_port
+    to_port           = var.micro2nano_app_port
+    protocol          = "tcp"
+    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+    # ipv6_cidr_blocks  = ["::/0"]
+    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  }
 
 
 
@@ -93,6 +102,15 @@ resource "aws_security_group_rule" "scep_ingress_ecs_service" {
   protocol          = "tcp"
   from_port         = var.scep_app_port
   to_port           = var.scep_app_port
+  source_security_group_id = aws_security_group.lb.id
+}
+
+resource "aws_security_group_rule" "micro2nano_ingress_ecs_service" {
+  security_group_id = aws_security_group.ecs_service.id
+  type              = "ingress"
+  protocol          = "tcp"
+  from_port         = var.micro2nano_app_port
+  to_port           = var.micro2nano_app_port
   source_security_group_id = aws_security_group.lb.id
 }
 
