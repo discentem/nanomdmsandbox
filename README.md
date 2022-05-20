@@ -6,7 +6,7 @@
 1. Create an AWS account.
 1. Generate IAM credentials with access to manage ECS, RDS, and the other services in this project. 
 
-> :warning: You can alternatively give the IAM credentials `AdministratorAccess` but this is not recommended.
+        > :warning: You can alternatively give the IAM credentials `AdministratorAccess` but this is not recommended.
 
 1. Generate an APNS Certificate. See https://micromdm.io/blog/certificates/ for info about this step.
 
@@ -72,7 +72,7 @@
     export AWS_ACCOUNT_ID={INSERT ACCOUNT ID HERE}
     ```
 
-Okay finally! Time to run Terraform...
+    Okay finally! Time to run Terraform...
 
 1. Do the "first run". Among other things, this creates nameservers. 
 
@@ -110,9 +110,15 @@ Okay finally! Time to run Terraform...
 
 ## Adding new containers
 
+If you want to add additional services to the cluster, take a look at:
+
 Example PR: https://github.com/discentem/nanomdmsandbox/pull/14
 
-### Destroying Terraform Infra
+## Destroying Terraform Infra
+
+```bash
+make tf-destroy
+```
 
 > :warning: You may have to manually delete some components of an RDS after running `terraform destroy`. See this [github issue](https://github.com/hashicorp/terraform-provider-aws/issues/4597#issuecomment-912910432) for more info.
 
@@ -123,7 +129,7 @@ You must enable these experimental docker features in your docker_config if buil
 
 ```json
 {
-"experimental": true,
+  "experimental": true,
   "features": {
     "buildkit": true
   }
