@@ -6,39 +6,9 @@
 1. Create an AWS account.
 1. Generate IAM credentials with access to manage ECS, RDS, and the other services in this project. 
 
-        > :warning: You can alternatively give the IAM credentials `AdministratorAccess` but this is not recommended.
+    > :warning: You can alternatively give the IAM credentials `AdministratorAccess` but this is not recommended.
 
-1. Generate an APNS Certificate. See https://micromdm.io/blog/certificates/ for info about this step.
-
-      <details>
-        <summary><b>For testing and development scenarios only</b>, you might be able to obtain a push certificate from <a href="https://mdmcert.download/">https://mdmcert.download/</a>. Expand this section for more info.</summary>
-
-        See [https://mdmcert.download/about](https://mdmcert.download/about) for more info and <b>disclaimers</b> about this option. Skip to [Generate MDM CSR](#generate-mdm-csr) if this does not apply to your situation. 
-
-    ### mdmcert.download
-
-      1. [Register for an mdmcert.download account](https://mdmcert.download/registration)
-      1. Submit a CSR to mdmcert.download's API
-
-          `mdmctl mdmcert.download -new -email=THE_EMAIL_YOU_REGISTERED_WITH@acme.com`
-
-      1. If successful, you should get this response from mdmcert.download
-
-          ```
-          Request successfully sent to mdmcert.download. Your CSR should now
-          be signed. Check your email for next steps. Then use the -decrypt option
-          to extract the CSR request which will then be uploaded to Apple.
-          ```
-      1. Download the encrypted CSR from your email.
-      1. Decrypt your CSR.
-
-          `mdmctl mdmcert.download decrypt=~/mdm_signed_request.20171122_094910_220.plist.b64.p7`
-      1. Sign into [identity.apple.com](identity.apple.com) with your Apple ID. This Apple ID will likely match the domain that you signed up to mdmcert.download with and the domain where you intend to host your MDM server. 
-      1. Download your push cert 🎉
-
-      You now have a push cert from mdmcert.download. You do not have to proceed with [Generate MDM CSR](#generate-mdm-csr) below. Continue with [Upload your push certificate](#upload-your-push-certificate).
-
-      </details>
+1. Generate an APNS Certificate. Checkout https://github.com/micromdm/micromdm/blob/main/docs/user-guide/quickstart.md#configure-an-apns-certificate and https://micromdm.io/blog/certificates/ for info about this step.
 
 ## Getting started
 
@@ -107,6 +77,10 @@
       make ecs-update-service CLUSTER=production-nanomdm-cluster SERVICE=production
       ```
     - Adjust `CLUSTER` and `SERVICE` to match what you specified in Terraform app_variables
+
+### Upload APNS Certificate
+
+FILL IN DETAILS!
 
 ## Adding new containers
 
