@@ -106,5 +106,18 @@ variable "public_key" {
   default = ""
 }
 
+variable "enrollment_profile_object_name" {
+  description = "Key in s3 referencing the enrollment.mobileconfig"
+  type        = string
+  default = "enrollment.mobileconfig"
+}
+
+variable "enrollment_profile_source_path" {
+  description = "Local source for enrollment.mobileconfig"
+  type        = string
+  default = "../app/enrollment.mobileconfig"
+}
+
+
 # variable "AWS_ACCESS_KEY" {}
 # variable "AWS_SECRET_KEY" {}

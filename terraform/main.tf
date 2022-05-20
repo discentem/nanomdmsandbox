@@ -165,6 +165,12 @@ module "acm_lb_certificate" {
   zone_id     = module.route53.zone_id
 }
 
+module "enrollment_endpoint" {
+  source = "./modules/s3"
+  app_name = var.app_name
+  enrollment_profile_source_path = var.enrollment_profile_source_path
+}
+
 
 module "ecs_nanomdm" {
   source = "./modules/ecs_service"
