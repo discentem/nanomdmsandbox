@@ -148,4 +148,7 @@ ecs-update-service: .check-args-ecs-update-service
 cli: # go build
 	go build -o build/cli ./cmd/main.go
 
+gen_enrollment: cli
+	./cmd/cli --gen_enrollment --base_url mdminfra.bkurtz.cloud --company bkurtz.cloud --scep_challenge ThisIsAChallenge --
+
 .PHONY: .check-args

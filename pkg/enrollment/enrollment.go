@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"strings"
 
 	"github.com/micromdm/micromdm/mdm/enroll"
 	"github.com/micromdm/nanomdm/cryptoutil"
@@ -90,10 +89,10 @@ func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 
 	payloadContent := []interface{}{}
 	fmt.Println("opts.serverURL", opts.serverURL)
-	scepURL := strings.ReplaceAll(fmt.Sprintf("%s:8080/scep", opts.serverURL), "https", "http")
-	fmt.Println("scepURL", scepURL)
+	// scepURL := strings.ReplaceAll(fmt.Sprintf("%s:8080/scep", opts.serverURL), "https", "http")
+	// fmt.Println("scepURL", scepURL)
 	scepContent := enroll.SCEPPayloadContent{
-		URL:      scepURL,
+		URL:      fmt.Sprintf("%s/scep", opts.serverURL),
 		Keysize:  2048,
 		KeyType:  "RSA",
 		KeyUsage: int(x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment),

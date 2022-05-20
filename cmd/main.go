@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&genEnrollment, "generate_enrollment", false, "generate enrollment profile")
+	flag.BoolVar(&genEnrollment, "gen_enrollment", false, "generate enrollment profile")
 	flag.StringVar(&baseMDMURL, "base_url", env.String("NANOMDM_BASE_URL", ""), "base mdm url")
 	flag.StringVar(&company, "company", env.String("NANOMDM_COMPANY", ""), "company name")
 	flag.StringVar(&scepChallenge, "scep_challenge", env.String("NANOMDM_SCEP_CHALLENGE", ""), "the challenge password matching your scep server")
@@ -58,7 +58,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	hostname := "nanomdm-rds.civ0hthv7lpj.us-east-1.rds.amazonaws.com"
+	hostname := ""
 
 	prompt := promptui.Prompt{
 		Label: "Username",
