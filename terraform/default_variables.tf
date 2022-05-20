@@ -33,6 +33,12 @@ variable "micro2nano_repository_name" {
   default = "micro2nano"
 }
 
+variable "mdmdirector_repository_name" {
+  type = string
+  description = "MDMDirector ECR Repository Name"
+  default = "mdmdirector"
+}
+
 variable "image_tag_mutability" {
   type        = string
   description = "Image tag mutability of: [MUTABLE, IMMUTABLE]. Defaults to MUTABLE."

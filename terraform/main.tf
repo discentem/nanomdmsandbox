@@ -29,6 +29,12 @@ module "micro2nano_ecr" {
   image_tag_mutability = var.image_tag_mutability
 }
 
+module "mdmdirector_ecr" {
+  source               = "./modules/ecr"
+  repository_name      = var.mdmdirector_repository_name
+  image_tag_mutability = var.image_tag_mutability
+}
+
 module "route53" {
   source      = "./modules/route53"
   domain_name = var.domain_name
@@ -39,12 +45,6 @@ module "vpc" {
   version = "~> 3.0"
 
   name = var.app_name
-  # cidr = "10.99.0.0/18"
-
-  # azs              = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
-  # public_subnets   = ["10.99.0.0/24", "10.99.1.0/24", "10.99.2.0/24"]
-  # private_subnets  = ["10.99.3.0/24", "10.99.4.0/24", "10.99.5.0/24"]
-  # database_subnets = ["10.99.7.0/24", "10.99.8.0/24", "10.99.9.0/24"]
   
   cidr = var.vpc_cidr
 
