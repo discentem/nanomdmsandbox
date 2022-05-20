@@ -82,6 +82,14 @@
 
 FILL IN DETAILS!
 
+### Send a push notification
+
+FILL IN DETAILS!
+
+### Set a wallpaper
+
+FILL IN DETAILS!
+
 ## Adding new containers
 
 If you want to add additional services to the cluster, take a look at:
