@@ -71,21 +71,47 @@ module "ecs_cluster" {
   app_name = var.app_name
 }
 
-# module "rds_auora" {
-#   source = "./modules/rds_aurora"
+resource "random_password" "psql_rds_master_password" {
+  length  = "20"
+  special = false
+}
 
-#   app_name = var.app_name
+module "rds_aurora_psql_mdmdirector" {
+  source = "./modules/rds_aurora"
 
-#   aws_region          = var.aws_region
-#   vpc_id              = module.vpc.vpc_id
-#   database_subnets    = module.vpc.database_subnets
-#   allowed_cidr_blocks = module.vpc.private_subnets_cidr_blocks
-# }
+  app_name = var.app_name
+  database_name = "mdmdirector"
+
+  aws_region          = var.aws_region
+  vpc_id              = module.vpc.vpc_id
+  database_subnets    = module.vpc.database_subnets
+  allowed_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+
+  create_random_password = false
+  master_password = random_password.psql_rds_master_password.result
+}
+
+module "rds_aurora_psql_mdmdirector_secret" {
+  source = "./modules/secrets"
+
+  name   = "rds_aurora_psql_mdmdirector"
+
+  aws_region           = var.aws_region
+  aws_account_id       = data.aws_caller_identity.current.account_id
+  
+  secret_string        = jsonencode(
+  { 
+    PSQL_USERNAME = module.rds_aurora_psql_mdmdirector.cluster_master_username,
+    PSQL_PASSWORD = module.rds_aurora_psql_mdmdirector.cluster_master_password,
+    PSQL_HOSTNAME = module.rds_aurora_psql_mdmdirector.cluster_endpoint,
+  })
+}
 
 module "rds" {
   source = "./modules/rds"
 
   app_name = var.app_name
+  db_name = "nanomdm"
 
   aws_region          = var.aws_region
   vpc_id              = module.vpc.vpc_id
@@ -94,6 +120,7 @@ module "rds" {
   
   create_db_instance  = true
 
+  create_random_password = false
   password = random_password.mysql_rds_master_password.result
 }
 
@@ -158,7 +185,6 @@ module "rds_secret" {
   )
   # secret_string        = jsonencode({ MYSQL_USERNAME = module.rds.mysql_cluster_master_username, MYSQL_PASSWORD = module.rds.mysql_cluster_master_password})
 }
-
 module "acm_lb_certificate" {
   source = "./modules/acm"
   domain_name = "mdm-infra.${var.domain_name}"
