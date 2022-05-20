@@ -74,13 +74,13 @@ resource "aws_security_group" "ecs_service" {
     },
   )
 
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
+  # egress {
+  #   from_port        = 0
+  #   to_port          = 0
+  #   protocol         = "-1"
+  #   cidr_blocks      = ["0.0.0.0/0"]
+  #   ipv6_cidr_blocks = ["::/0"]
+  # }
 
   lifecycle {
     create_before_destroy = true
@@ -129,5 +129,14 @@ resource "aws_security_group_rule" "http_ingress_ecs_service" {
   protocol          = "tcp"
   from_port         = 80
   to_port           = 80
+  source_security_group_id = aws_security_group.lb.id
+}
+
+resource "aws_security_group_rule" "egress_allow_all" {
+  security_group_id = aws_security_group.ecs_service.id
+  type              = "egress"
+  to_port           = 0
+  protocol          = "-1"
+  from_port         = 0
   source_security_group_id = aws_security_group.lb.id
 }
