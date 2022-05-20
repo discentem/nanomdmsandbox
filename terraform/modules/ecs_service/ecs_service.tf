@@ -39,17 +39,6 @@ module "nanomdm" {
     }
   }
 
-
-
-#     "logConfiguration": {
-#       "logDriver": "awslogs",
-#       "options": {
-#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
-#         "awslogs-region": "${data.aws_region.current.name}",
-#         "awslogs-stream-prefix": "ecs"
-#       }
-#     },
-
   secrets = [
     {
       "name": "MYSQL_PASSWORD",
@@ -137,11 +126,59 @@ module "micro2nano" {
     }
   }
 
-
   environment = local.task_environment
 
   memory = var.micro2nano_task_definition_memory
   cpu    = var.micro2nano_task_definition_cpu
+
+  register_task_definition = false
+}
+
+// MDMDirector Task Definition //
+module "mdmdirector" {
+  source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-mdmdirector"
+
+  image     = "${var.mdmdirector_container_image}"
+  essential = true
+
+  portMappings = [
+    {
+      containerPort =  var.mdmdirector_app_port
+      hostPort = var.mdmdirector_app_port
+      protocol = "tcp"
+    },
+  ]
+
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+  secrets = [
+    {
+      "name": "DB_PASSWORD",
+      "valueFrom": "${var.psql_secrets_manager_arn}:PSQL_PASSWORD::"
+    },
+    {
+      "name": "DB_USERNAME",
+      "valueFrom": "${var.psql_secrets_manager_arn}:PSQL_USERNAME::"
+    },
+    {
+      "name": "DB_HOSTNAME",
+      "valueFrom": "${var.psql_secrets_manager_arn}:PSQL_HOSTNAME::"
+    }
+  ]
+
+  environment = local.task_environment
+
+  memory = var.mdmdirector_task_definition_memory
+  cpu    = var.mdmdirector_task_definition_cpu
 
   register_task_definition = false
 }
@@ -154,7 +191,8 @@ module "merged" {
  container_definitions = [
    "${module.nanomdm.container_definitions}",
    "${module.scep.container_definitions}",
-   "${module.micro2nano.container_definitions}"
+   "${module.micro2nano.container_definitions}",
+   "${module.mdmdirector.container_definitions}"
  ]
 }
 
@@ -279,7 +317,7 @@ resource "aws_ecs_service" "service" {
   #   }
   # }
 
-  // Load Balancers for NanoMDM and SCEP //
+  // Load Balancers for all services //
 
   load_balancer {
     target_group_arn = aws_alb_target_group.nanomdm.arn
@@ -297,6 +335,12 @@ resource "aws_ecs_service" "service" {
     target_group_arn = aws_alb_target_group.micro2nano.arn
     container_name   = "${var.app_name}-micro2nano"
     container_port   = var.micro2nano_app_port
+  }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.mdmdirector.arn
+    container_name   = "${var.app_name}-mdmdirector"
+    container_port   = var.mdmdirector_app_port
   }
 
 

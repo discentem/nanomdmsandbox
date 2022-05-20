@@ -103,13 +103,40 @@ resource "aws_alb_target_group" "micro2nano" {
   }
 }
 
+// mdmdirector target group //
+resource "aws_alb_target_group" "mdmdirector" {
+  name_prefix = "mdirtg"
+  port        = var.mdmdirector_app_port
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  dynamic "health_check" {
+    for_each = [var.mdmdirector_health_check]
+    content {
+      enabled             = lookup(health_check.value, "enabled", null)
+      interval            = lookup(health_check.value, "interval", null)
+      path                = lookup(health_check.value, "path", null)
+      port                = lookup(health_check.value, "port", null)
+      protocol            = lookup(health_check.value, "protocol", null)
+      timeout             = lookup(health_check.value, "timeout", null)
+      healthy_threshold   = lookup(health_check.value, "healthy_threshold", null)
+      unhealthy_threshold = lookup(health_check.value, "unhealthy_threshold", null)
+      matcher             = lookup(health_check.value, "matcher", null)
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
 resource "aws_alb_listener_rule" "nanomdm" {
   listener_arn = aws_alb_listener.https.arn
   # priority     = 100
 
   action {
     type             = "forward"
-    # target_group_arn = aws_lb_target_group.static.arn
     target_group_arn = aws_alb_target_group.nanomdm.arn
   }
 
@@ -148,14 +175,35 @@ resource "aws_alb_listener_rule" "scep" {
   # }
 }
 
-resource "aws_alb_listener_rule" "micro2nano" {
+# resource "aws_alb_listener_rule" "micro2nano" {
+#   listener_arn = aws_alb_listener.https.arn
+#   # priority     = 100
+
+#   action {
+#     type             = "forward"
+#     # target_group_arn = aws_lb_target_group.static.arn
+#     target_group_arn = aws_alb_target_group.micro2nano.arn
+#   }
+
+#   condition {
+#     path_pattern {
+#       values = ["/v1/commands", "/v1/commands/*"]
+#     }
+#   }
+
+#   # condition {
+#   #   host_header {
+#   #     values = ["${var.lb_subdomain_name}.${var.domain_name}"]
+#   #   }
+#   # }
+# }
+
+resource "aws_alb_listener_rule" "mdmdirector" {
   listener_arn = aws_alb_listener.https.arn
-  # priority     = 100
 
   action {
     type             = "forward"
-    # target_group_arn = aws_lb_target_group.static.arn
-    target_group_arn = aws_alb_target_group.micro2nano.arn
+    target_group_arn = aws_alb_target_group.mdmdirector.arn
   }
 
   condition {
@@ -163,14 +211,7 @@ resource "aws_alb_listener_rule" "micro2nano" {
       values = ["/v1/commands", "/v1/commands/*"]
     }
   }
-
-  # condition {
-  #   host_header {
-  #     values = ["${var.lb_subdomain_name}.${var.domain_name}"]
-  #   }
-  # }
 }
-
 
 // Attach all application target groups to the listeners //
 resource "aws_alb_listener" "https" {

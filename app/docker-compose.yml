@@ -3,7 +3,6 @@ version: "3.7"
 services:
   scep:
     image: scep
-    # image: <my account>.dkr.ecr.<my region>.amazonaws.com/akff-web
     volumes:
       - ./config/certs/depot:/service/scep/depot
     build:
@@ -34,17 +33,35 @@ services:
       - scep
   micro2nano:
     image: micro2nano
-    # image: <my account>.dkr.ecr.<my region>.amazonaws.com/akff-web
     build:
       context: .
       dockerfile: ./images/micro2nano/Dockerfile
       args:
         - VERSION=0.2.0
-        - API_KEY=nanomdm
+        - MICROMDM_API_KEY=nanomdm
         - NANO_API_KEY=nanomdm
         - NANO_URL=http://127.0.0.1:9000/v1/enqueue
     ports:
       - "9001:9001"
     depends_on:
+      - nanomdm
+
+  mdmdirector:
+    image: mdmdirector
+    build:
+      context: .
+      dockerfile: ./images/mdmdirector/Dockerfile
+      args:
+        - VERSION=0.3.1
+        - DB_NAME=mdmdirector
+        - DB_HOSTNAME=localhost
+        - DB_PORT=5432
+        - MICROMDM_API_KEY=nanomdm
+        - MICROMDM_URL=localhost:9001
+        - MDMDIRECTOR_API_KEY=mdmdirector
+    ports:
+      - "8000:8000"
+    depends_on:
+      - micro2nano
       - nanomdm
 

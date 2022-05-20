@@ -6,8 +6,8 @@ RUN apt install -y curl gzip unzip
 ARG VERSION
 ENV VERSION $VERSION
 
-ARG API_KEY
-ENV API_KEY $API_KEY
+ARG MICROMDM_API_KEY
+ENV MICROMDM_API_KEY $MICROMDM_API_KEY
 
 ARG NANO_API_KEY
 ENV NANO_API_KEY $NANO_API_KEY
@@ -25,4 +25,4 @@ RUN chmod a+x ./cmdapi-linux-amd64
 
 EXPOSE 9001
 
-CMD ./cmdapi-linux-amd64 -api-key $API_KEY -nano-api-key $NANO_API_KEY -nano-url $NANO_URL
+CMD ./cmdapi-linux-amd64 -api-key $MICROMDM_API_KEY -nano-api-key $NANO_API_KEY -nano-url $NANO_URL
