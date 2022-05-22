@@ -10,6 +10,15 @@ resource "aws_security_group" "lb" {
   )
 
   ingress {
+    from_port         = 80
+    to_port           = 80
+    protocol          = "tcp"
+    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+    # ipv6_cidr_blocks  = ["::/0"]
+    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  }
+
+  ingress {
     from_port         = 443
     to_port           = 443
     protocol          = "tcp"
@@ -19,41 +28,41 @@ resource "aws_security_group" "lb" {
   }
 
 
-  ingress {
-    from_port         = var.nanomdm_app_port
-    to_port           = var.nanomdm_app_port
-    protocol          = "tcp"
-    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
-    # ipv6_cidr_blocks  = ["::/0"]
-    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
-  }
+  # ingress {
+  #   from_port         = var.nanomdm_app_port
+  #   to_port           = var.nanomdm_app_port
+  #   protocol          = "tcp"
+  #   cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+  #   # ipv6_cidr_blocks  = ["::/0"]
+  #   # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  # }
 
-  ingress {
-    from_port         = var.scep_app_port
-    to_port           = var.scep_app_port
-    protocol          = "tcp"
-    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
-    # ipv6_cidr_blocks  = ["::/0"]
-    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
-  }
+  # ingress {
+  #   from_port         = var.scep_app_port
+  #   to_port           = var.scep_app_port
+  #   protocol          = "tcp"
+  #   cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+  #   # ipv6_cidr_blocks  = ["::/0"]
+  #   # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  # }
   
-  ingress {
-    from_port         = var.micro2nano_app_port
-    to_port           = var.micro2nano_app_port
-    protocol          = "tcp"
-    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
-    # ipv6_cidr_blocks  = ["::/0"]
-    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
-  }
+  # ingress {
+  #   from_port         = var.micro2nano_app_port
+  #   to_port           = var.micro2nano_app_port
+  #   protocol          = "tcp"
+  #   cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+  #   # ipv6_cidr_blocks  = ["::/0"]
+  #   # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  # }
 
-  ingress {
-    from_port         = var.mdmdirector_app_port
-    to_port           = var.mdmdirector_app_port
-    protocol          = "tcp"
-    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
-    # ipv6_cidr_blocks  = ["::/0"]
-    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
-  }
+  # ingress {
+  #   from_port         = var.mdmdirector_app_port
+  #   to_port           = var.mdmdirector_app_port
+  #   protocol          = "tcp"
+  #   cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+  #   # ipv6_cidr_blocks  = ["::/0"]
+  #   # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  # }
 
 
   egress {
@@ -81,14 +90,6 @@ resource "aws_security_group" "ecs_service" {
       Name = "${local.prefix_app_name}-ecs-service-sg"
     },
   )
-
-  # egress {
-  #   from_port        = 0
-  #   to_port          = 0
-  #   protocol         = "-1"
-  #   cidr_blocks      = ["0.0.0.0/0"]
-  #   ipv6_cidr_blocks = ["::/0"]
-  # }
 
   lifecycle {
     create_before_destroy = true

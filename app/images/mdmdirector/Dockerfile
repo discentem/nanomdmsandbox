@@ -41,4 +41,4 @@ RUN chmod a+x ./mdmdirector-linux
 
 EXPOSE 8000
 
-CMD ./mdmdirector-linux -db-username ${DB_USERNAME} -db-password ${DB_PASSWORD} -db-host ${DB_HOSTNAME} -db-port ${DB_PORT} -db-sslmode require -db-name ${DB_NAME} -micromdmapikey ${MICROMDM_API_KEY} -micromdmurl https://${MICROMDM_URL} -password ${MDMDIRECTOR_API_KEY} -loglevel debug
+CMD ./mdmdirector-linux -db-username ${DB_USERNAME} -db-password ${DB_PASSWORD} -db-host ${DB_HOSTNAME} -db-port ${DB_PORT} -db-sslmode require -db-name ${DB_NAME} -micromdmapikey ${MICROMDM_API_KEY} -micromdmurl ${MICROMDM_URL} -password ${MDMDIRECTOR_API_KEY} -loglevel debug

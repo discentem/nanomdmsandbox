@@ -6,6 +6,7 @@ OS_VERSION = $(shell uname)
 VERSION := $(shell git describe --tags --always)
 
 TERRAFORM_DIR := $(shell pwd)/terraform
+TERRAFORM_REMOTE_STATE_INIT_DIR := $(shell pwd)/terraform/remote_state
 
 APP_DIR := app
 
@@ -74,6 +75,15 @@ build-containers-docker-compose: .check-args
 .PHONY: docker-compose # Build all containers and publish the containers to AWS ECR
 docker-compose: build-containers-docker-compose
 
+
+# terraform tf-remote-state-init
+#
+#
+.PHONY: tf-remote-state-init # Runs tf-init and tf-apply for the initial terraform remote state
+tf-remote-state-init: .check-args
+	terraform -chdir=$(TERRAFORM_REMOTE_STATE_INIT_DIR) init
+	terraform -chdir=$(TERRAFORM_REMOTE_STATE_INIT_DIR) apply
+
 # terraform deploy
 #
 #
@@ -87,6 +97,13 @@ tf-deploy: tf-init tf-apply
 .PHONY: tf-apply # Runs tf-apply
 tf-apply:
 	terraform -chdir=$(TERRAFORM_DIR) apply
+
+# terraform apply refresh
+#
+#
+.PHONY: tf-apply-refresh # Runs tf-apply -refresh-only
+tf-apply-refresh:
+	terraform -chdir=$(TERRAFORM_DIR) apply -refresh-only
 
 # terraform destroy
 #
@@ -133,7 +150,7 @@ ifndef CLUSTER
 	$(error CLUSTER is not set. please use `make {XXX} CLUSTER=<production-nanomdm-cluster>.`)
 endif
 ifndef SERVICE
-	$(error SERVICE is not set. please use `make {XXX} SERVICE=<production>.`)
+	$(error SERVICE is not set. please use `make {XXX} SERVICE=<nanomdm>.`)
 endif
 
 .PHONY: ecs-update-service # Force redeployment of ECS service

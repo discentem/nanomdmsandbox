@@ -209,11 +209,10 @@ module "ecs_nanomdm" {
   zone_id     = module.route53.zone_id
   certificate_arn = module.acm_lb_certificate.acm_certificate_arn
 
-  container_definition_cpu = 512
-  container_definition_memory = 1024
+  container_definition_cpu = 1024
+  container_definition_memory = 2048
 
-  // SCEP TASKs //
-
+  // SCEP tasks //
   scep_container_image = "${module.scep_ecr.repository_url}:latest"
   scep_app_port        = 8080
 
@@ -232,8 +231,7 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
-  // NanoMDM TASKs //
-
+  // NanoMDM tasks //
   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}:latest"
   nanomdm_app_port        = 9000
 
@@ -256,31 +254,49 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
-  // Public CIDRs to allow access to the load balancers //
+  // MDMDirector tasks //
+  mdmdirector_container_image = "${module.mdmdirector_ecr.repository_url}:latest"
+  mdmdirector_app_port        = 8000
 
-  public_inbound_cidr_blocks_ipv4 = var.public_inbound_cidr_blocks_ipv4
-  public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
+  psql_secrets_manager_arn = module.rds_aurora_psql_mdmdirector_secret.arn
+  mdmdirector_task_container_environment = {
+    APP_NAME       = var.app_name
+  }
 
-  # depends_on = [module.push_docker_images]
-
-  micro2nano_container_image = "${module.micro2nano_ecr.repository_url}:latest"
-  micro2nano_app_port        = 9001
-
-  # scep_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
-  micro2nano_task_definition_cpu    = 128
-  micro2nano_task_definition_memory = 256
-
-  micro2nano_health_check = {
+  mdmdirector_task_definition_cpu    = 128
+  mdmdirector_task_definition_memory = 256
+  mdmdirector_health_check = {
     port                = "traffic-port"
-    path                = "/v1/commands"
+    path                = "/health"
     health_threshold    = "3"
     interval            = "60"
     protocol            = "HTTP"
-    matcher             = "401"
+    matcher             = "200"
     timeout             = "3"
     unhealthy_threshold = "2"
   }
 
+  // micro2nano tasks //
+  micro2nano_container_image = "${module.micro2nano_ecr.repository_url}:latest"
+  micro2nano_app_port        = 9001
+
+  micro2nano_task_definition_cpu    = 128
+  micro2nano_task_definition_memory = 256
+
+  # micro2nano_health_check = {
+  #   port                = "traffic-port"
+  #   path                = "/v1/commands"
+  #   health_threshold    = "3"
+  #   interval            = "60"
+  #   protocol            = "HTTP"
+  #   matcher             = "401"
+  #   timeout             = "3"
+  #   unhealthy_threshold = "2"
+  # }
+
+  // Public CIDRs to allow access to the load balancers //
+  public_inbound_cidr_blocks_ipv4 = var.public_inbound_cidr_blocks_ipv4
+  public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
 }
 
 # module "push_docker_images" {

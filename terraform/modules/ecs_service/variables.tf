@@ -96,7 +96,23 @@ variable "nanomdm_task_container_environment" {
   type        = map(string)
 }
 
+variable "mdmdirector_task_definition_cpu" {
+  description = "Amount of CPU to reserve for the task."
+  default     = 256
+  type        = number
+}
 
+variable "mdmdirector_task_definition_memory" {
+  description = "The soft limit (in MiB) of memory to reserve for the task."
+  default     = 512
+  type        = number
+}
+
+variable "mdmdirector_task_container_environment" {
+  description = "The environment variables to pass to a mdmdirector."
+  default     = {}
+  type        = map(string)
+}
 
 variable "mdmdirector_container_image" {
   description = "The mdmdirector image used to start a container."
@@ -107,24 +123,6 @@ variable "mdmdirector_app_port" {
   description = "The mdmdirector app port used for the container."
   type        = number
   default     = 8000
-}
-
-variable "mdmdirector_task_definition_cpu" {
-  description = "Amount of CPU to reserve for the task."
-  default     = 256
-  type        = number
-}
-
-variable "nanomdm_task_definition_memory" {
-  description = "The soft limit (in MiB) of memory to reserve for the task."
-  default     = 512
-  type        = number
-}
-
-variable "mdmdirector_task_container_environment" {
-  description = "The environment variables to pass to a mdmdirector."
-  default     = {}
-  type        = map(string)
 }
 
 variable "micro2nano_container_image" {
@@ -158,13 +156,13 @@ variable "micro2nano_task_container_environment" {
 
 variable "default_task_definition_cpu" {
   description = "Amount of CPU to reserve for the task."
-  default     = 256
+  default     = 128
   type        = number
 }
 
 variable "default_task_definition_memory" {
   description = "The soft limit (in MiB) of memory to reserve for the task."
-  default     = 512
+  default     = 256
   type        = number
 }
 
@@ -227,10 +225,10 @@ variable "nanomdm_health_check" {
   type        = map(string)
 }
 
-variable "micro2nano_health_check" {
-  description = "A health block containing health check settings for the target group. Overrides the defaults."
-  type        = map(string)
-}
+# variable "micro2nano_health_check" {
+#   description = "A health block containing health check settings for the target group. Overrides the defaults."
+#   type        = map(string)
+# }
 
 variable "mdmdirector_health_check" {
   description = "A health block containing health check settings for the target group. Overrides the defaults."

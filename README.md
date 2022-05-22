@@ -2,7 +2,7 @@
 
 ## Prereqs
 
-1. Buy a domain. There are registars you can choose from but we are partial to namecheap.com.
+1. Buy a domain. There are registrars you can choose from but we are partial to namecheap.com.
 1. Create an AWS account.
 1. Generate IAM credentials with access to manage ECS, RDS, and the other services in this project. 
 
@@ -28,7 +28,7 @@
     1. cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
       1. Fill in secrets
       1. ipv4 CIDR BLOCKS
-      1. root domain name 
+      1. root domain name
 
 1. Activate Terraform 1.1.9 within tfenv
     ```bash
@@ -44,8 +44,12 @@
 
     Okay finally! Time to run Terraform...
 
-1. Do the "first run". Among other things, this creates nameservers. 
+1. Create the TF remote state. You don't have to use S3 backend and can use whatever you want but this project used an S3 bucket for ease of collaboration while working on Terraform.
+    ```bash
+    make tf-remote-state-init AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
+    ```
 
+1. Now the "first run" stuff can be launched. Among other things, this creates proper Route53 NS associations that can be used to manage all sub-domain or root domain operations for any of the required Route53 records within the module. 
     ```bash
     make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
     ```
@@ -56,7 +60,6 @@
     make tf-plan
     ```
 1. If the plan looks good... 
-    
     ```
     make tf-apply
     ```
@@ -74,7 +77,7 @@
 1. Force the ECS service to re-deploy:
       
       ```
-      make ecs-update-service CLUSTER=production-nanomdm-cluster SERVICE=production
+      make ecs-update-service CLUSTER=production-nanomdm-cluster SERVICE=nanomdm
       ```
     - Adjust `CLUSTER` and `SERVICE` to match what you specified in Terraform app_variables
 

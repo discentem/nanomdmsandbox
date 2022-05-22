@@ -76,32 +76,32 @@ resource "aws_alb_target_group" "nanomdm" {
 }
 
 // micro2nano target group //
-resource "aws_alb_target_group" "micro2nano" {
-  name_prefix = "m2ntg"
-  # name        = "${local.prefix_app_name}-nanomdm-tg"
-  port        = var.micro2nano_app_port
-  protocol    = "HTTP"
-  vpc_id      = var.vpc_id
-  target_type = "ip"
+# resource "aws_alb_target_group" "micro2nano" {
+#   name_prefix = "m2ntg"
+#   # name        = "${local.prefix_app_name}-nanomdm-tg"
+#   port        = var.micro2nano_app_port
+#   protocol    = "HTTP"
+#   vpc_id      = var.vpc_id
+#   target_type = "ip"
 
-  dynamic "health_check" {
-    for_each = [var.micro2nano_health_check]
-    content {
-      enabled             = lookup(health_check.value, "enabled", null)
-      interval            = lookup(health_check.value, "interval", null)
-      path                = lookup(health_check.value, "path", null)
-      port                = lookup(health_check.value, "port", null)
-      protocol            = lookup(health_check.value, "protocol", null)
-      timeout             = lookup(health_check.value, "timeout", null)
-      healthy_threshold   = lookup(health_check.value, "healthy_threshold", null)
-      unhealthy_threshold = lookup(health_check.value, "unhealthy_threshold", null)
-      matcher             = lookup(health_check.value, "matcher", null)
-    }
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+#   dynamic "health_check" {
+#     for_each = [var.micro2nano_health_check]
+#     content {
+#       enabled             = lookup(health_check.value, "enabled", null)
+#       interval            = lookup(health_check.value, "interval", null)
+#       path                = lookup(health_check.value, "path", null)
+#       port                = lookup(health_check.value, "port", null)
+#       protocol            = lookup(health_check.value, "protocol", null)
+#       timeout             = lookup(health_check.value, "timeout", null)
+#       healthy_threshold   = lookup(health_check.value, "healthy_threshold", null)
+#       unhealthy_threshold = lookup(health_check.value, "unhealthy_threshold", null)
+#       matcher             = lookup(health_check.value, "matcher", null)
+#     }
+#   }
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
 
 // mdmdirector target group //
 resource "aws_alb_target_group" "mdmdirector" {
@@ -167,12 +167,6 @@ resource "aws_alb_listener_rule" "scep" {
       values = ["/scep", "/scep/*", "/scep*"]
     }
   }
-
-  # condition {
-  #   host_header {
-  #     values = ["${var.lb_subdomain_name}.${var.domain_name}"]
-  #   }
-  # }
 }
 
 # resource "aws_alb_listener_rule" "micro2nano" {
@@ -190,12 +184,6 @@ resource "aws_alb_listener_rule" "scep" {
 #       values = ["/v1/commands", "/v1/commands/*"]
 #     }
 #   }
-
-#   # condition {
-#   #   host_header {
-#   #     values = ["${var.lb_subdomain_name}.${var.domain_name}"]
-#   #   }
-#   # }
 # }
 
 resource "aws_alb_listener_rule" "mdmdirector" {
@@ -221,43 +209,67 @@ resource "aws_alb_listener" "https" {
   ssl_policy        = "ELBSecurityPolicy-2016-08"
   certificate_arn   = var.certificate_arn
 
+  # default_action {
+  #   type             = "forward"
+  #   target_group_arn = aws_alb_target_group.nanomdm.arn
+  # }
   default_action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.nanomdm.arn
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "application/json"
+      message_body = jsonencode({"status": "404", "message": "route not found"})
+      status_code  = "404"
+    }
   }
 }
 
+resource "aws_alb_listener" "http" {
+  load_balancer_arn = aws_alb.lb.id
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
 
 # Redirect all traffic from the ALB to the target group
-resource "aws_alb_listener" "scep_lb_listener" {
-  load_balancer_arn = aws_alb.lb.id
-  port              = var.scep_app_port
-  protocol          = "HTTP"
+# resource "aws_alb_listener" "scep_lb_listener" {
+#   load_balancer_arn = aws_alb.lb.id
+#   port              = var.scep_app_port
+#   protocol          = "HTTP"
 
-  default_action {
-    target_group_arn = aws_alb_target_group.scep.arn
-    type             = "forward"
-  }
-}
+#   default_action {
+#     target_group_arn = aws_alb_target_group.scep.arn
+#     type             = "forward"
+#   }
+# }
 
-resource "aws_alb_listener" "nanomdm_lb_listener" {
-  load_balancer_arn = aws_alb.lb.id
-  port              = var.nanomdm_app_port
-  protocol          = "HTTP"
+# resource "aws_alb_listener" "nanomdm_lb_listener" {
+#   load_balancer_arn = aws_alb.lb.id
+#   port              = var.nanomdm_app_port
+#   protocol          = "HTTP"
 
-  default_action {
-    target_group_arn = aws_alb_target_group.nanomdm.arn
-    type             = "forward"
-  }
-}
+#   default_action {
+#     target_group_arn = aws_alb_target_group.nanomdm.arn
+#     type             = "forward"
+#   }
+# }
 
-resource "aws_alb_listener" "micro2nano_lb_listener" {
-  load_balancer_arn = aws_alb.lb.id
-  port              = var.micro2nano_app_port
-  protocol          = "HTTP"
+# resource "aws_alb_listener" "micro2nano_lb_listener" {
+#   load_balancer_arn = aws_alb.lb.id
+#   port              = var.micro2nano_app_port
+#   protocol          = "HTTP"
 
-  default_action {
-    target_group_arn = aws_alb_target_group.micro2nano.arn
-    type             = "forward"
-  }
-}
+#   default_action {
+#     target_group_arn = aws_alb_target_group.micro2nano.arn
+#     type             = "forward"
+#   }
+# }

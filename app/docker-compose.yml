@@ -46,6 +46,12 @@ services:
     depends_on:
       - nanomdm
 
+  redis:
+    image: "redis:alpine"
+    hostname: redis
+    ports:
+      - "6379:6379"
+
   mdmdirector:
     image: mdmdirector
     build:
@@ -57,11 +63,12 @@ services:
         - DB_HOSTNAME=localhost
         - DB_PORT=5432
         - MICROMDM_API_KEY=nanomdm
-        - MICROMDM_URL=localhost:9001
+        - MICROMDM_URL=http://localhost:9001
         - MDMDIRECTOR_API_KEY=mdmdirector
     ports:
       - "8000:8000"
     depends_on:
       - micro2nano
       - nanomdm
+      - redis
 
