@@ -148,4 +148,7 @@ ecs-update-service: .check-args-ecs-update-service
 cli: # go build
 	go build -o build/cli ./cmd/main.go
 
+gen_enrollment: cli
+	./build/cli --gen_enrollment
+
 .PHONY: .check-args

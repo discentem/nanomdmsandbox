@@ -25,29 +25,27 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&genEnrollment, "generate_enrollment", false, "generate enrollment profile")
+	flag.BoolVar(&genEnrollment, "gen_enrollment", false, "generate enrollment profile")
 	flag.StringVar(&baseMDMURL, "base_url", env.String("NANOMDM_BASE_URL", ""), "base mdm url")
 	flag.StringVar(&company, "company", env.String("NANOMDM_COMPANY", ""), "company name")
 	flag.StringVar(&scepChallenge, "scep_challenge", env.String("NANOMDM_SCEP_CHALLENGE", ""), "the challenge password matching your scep server")
-	flag.StringVar(&pathToPem, "path_to_pem", env.String("NANOMDM_PUSH_PEM", ""), "output path for mobileconfig")
+	flag.StringVar(&pathToPem, "push_pem_path", env.String("NANOMDM_PUSH_PEM", ""), "output path for mobileconfig")
 
 }
 
 func main() {
 	flag.Parse()
 	if genEnrollment {
-		if pathToPem == "" {
-			log.Fatal("pathToPem cannot be empty")
-		}
+		finalBaseMDMURL, finalCompany, finalScepChallenge, finalPathToPem := promptForFlags()
 		profile, err := enrollment.EnrollmentProfile(
-			baseMDMURL,
-			company,
-			scepChallenge,
-			pathToPem)
+			finalBaseMDMURL,
+			finalCompany,
+			finalScepChallenge,
+			finalPathToPem)
 		if err != nil {
 			log.Fatal(err)
 		}
-		b, err := plist.Marshal(profile)
+		b, err := plist.MarshalIndent(profile, "  ")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -55,43 +53,122 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		os.Exit(1)
+	} else {
+
+		hostname := ""
+
+		prompt := promptui.Prompt{
+			Label: "Username",
+		}
+
+		username, err := prompt.Run()
+
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+		}
+
+		prompt = promptui.Prompt{
+			Label: "Password",
+			Mask:  '*',
+		}
+
+		password, err := prompt.Run()
+
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+		}
+
+		dsnString := dsn("", username, password, hostname)
+
+		config, err := validateDSNString(dsnString)
+
+		// dsnString, err := CreateDSN(hostname, username, password, 0)
+		if err != nil {
+			fmt.Printf("validateDSNString: error: %v", err)
+		}
+		fmt.Printf("\n%s%s\n", "Input DSN String: ", dsnString)
+		fmt.Printf("\n%s%s\n", "Validated DSN String: ", config.FormatDSN())
+		fmt.Printf("\n%s%v\n", "Validated Config: ", config)
 	}
 
-	hostname := "nanomdm-rds.civ0hthv7lpj.us-east-1.rds.amazonaws.com"
+}
 
-	prompt := promptui.Prompt{
-		Label: "Username",
+func promptForFlags() (string, string, string, string) {
+	finalBaseMDMURL := baseMDMURL
+	finalCompany := company
+	finalScepChallenge := scepChallenge
+	finalPathToPem := pathToPem
+
+	if finalBaseMDMURL == "" {
+		prompt := promptui.Prompt{
+			Label: "baseMDMURL",
+			Validate: func(input string) error {
+				if input == "" {
+					return errors.New("baseMDMURL can't be empty")
+				}
+				return nil
+			},
+		}
+		var err error
+		finalBaseMDMURL, err = prompt.Run()
+
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+		}
 	}
 
-	username, err := prompt.Run()
+	if finalCompany == "" {
+		prompt := promptui.Prompt{
+			Label: "company (ex: acme.com)",
+			Validate: func(input string) error {
+				if input == "" {
+					return errors.New("company can't be empty")
+				}
+				return nil
+			},
+		}
+		var err error
+		finalCompany, err = prompt.Run()
 
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+		}
+	}
+	if finalScepChallenge == "" {
+		prompt := promptui.Prompt{
+			Label: "scepChallenge (ex: ThisIsAChallenge)",
+			Validate: func(input string) error {
+				if input == "" {
+					return errors.New("scepChallenge can't be empty")
+				}
+				return nil
+			},
+		}
+		var err error
+		finalScepChallenge, err = prompt.Run()
+
+		if err != nil {
+			fmt.Printf("Prompt failed %v\n", err)
+		}
+	}
+	if finalPathToPem == "" {
+		prompt := promptui.Prompt{
+			Label: "path to push cert",
+			Validate: func(input string) error {
+				_, err := os.Stat(input)
+				return err
+			},
+		}
+		var err error
+		finalPathToPem, err = prompt.Run()
+
+		if os.IsNotExist(err) {
+			fmt.Printf("Prompt failed %v\n", err)
+		}
+
 	}
 
-	prompt = promptui.Prompt{
-		Label: "Password",
-		Mask:  '*',
-	}
-
-	password, err := prompt.Run()
-
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-	}
-
-	dsnString := dsn("", username, password, hostname)
-
-	config, err := validateDSNString(dsnString)
-
-	// dsnString, err := CreateDSN(hostname, username, password, 0)
-	if err != nil {
-		fmt.Printf("validateDSNString: error: %v", err)
-	}
-	fmt.Printf("\n%s%s\n", "Input DSN String: ", dsnString)
-	fmt.Printf("\n%s%s\n", "Validated DSN String: ", config.FormatDSN())
-	fmt.Printf("\n%s%v\n", "Validated Config: ", config)
+	return finalBaseMDMURL, finalCompany, finalScepChallenge, finalPathToPem
 
 }
 
