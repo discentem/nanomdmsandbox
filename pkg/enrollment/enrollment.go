@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/micromdm/micromdm/mdm/enroll"
 	"github.com/micromdm/nanomdm/cryptoutil"
@@ -47,7 +48,6 @@ func EnrollmentProfile(serverURL, company, scepChallenge, pathToPem string) (*en
 }
 
 func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
-	fmt.Println(opts)
 	if opts.pathToPem == "" {
 		return nil, errors.New("opts.pathToPem must be provided")
 	}
@@ -59,7 +59,6 @@ func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(opts.topic)
 
 	profile := enroll.NewProfile()
 	profile.PayloadIdentifier = fmt.Sprintf("com.%s.nanomdm.scep", opts.company)
@@ -74,12 +73,18 @@ func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 	mdmPayload.PayloadIdentifier = fmt.Sprintf("com.%s.nanomdm.mdm", opts.company)
 	mdmPayload.PayloadScope = "System"
 
+	var serverURL string
+	if !strings.Contains(opts.serverURL, "https://") {
+		serverURL = fmt.Sprintf("https://%s", opts.serverURL)
+	} else {
+		serverURL = opts.serverURL
+	}
 	mdmPayloadContent := enroll.MDMPayloadContent{
 		Payload:             *mdmPayload,
 		AccessRights:        allRights(),
-		CheckInURL:          fmt.Sprintf("%s/mdm", opts.serverURL),
+		CheckInURL:          fmt.Sprintf("%s/mdm", serverURL),
 		CheckOutWhenRemoved: true,
-		ServerURL:           fmt.Sprintf("%s/mdm", opts.serverURL),
+		ServerURL:           fmt.Sprintf("%s/mdm", serverURL),
 		Topic:               opts.topic,
 		SignMessage:         true,
 		ServerCapabilities: []string{
@@ -88,11 +93,9 @@ func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 	}
 
 	payloadContent := []interface{}{}
-	fmt.Println("opts.serverURL", opts.serverURL)
-	// scepURL := strings.ReplaceAll(fmt.Sprintf("%s:8080/scep", opts.serverURL), "https", "http")
-	// fmt.Println("scepURL", scepURL)
+
 	scepContent := enroll.SCEPPayloadContent{
-		URL:      fmt.Sprintf("%s/scep", opts.serverURL),
+		URL:      fmt.Sprintf("%s/scep", serverURL),
 		Keysize:  2048,
 		KeyType:  "RSA",
 		KeyUsage: int(x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment),
