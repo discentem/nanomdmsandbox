@@ -146,9 +146,14 @@ ecs-update-service: .check-args-ecs-update-service
 #
 .PHONY: cli # go build
 cli: # go build
-	go build -o build/cli ./cmd/main.go
+	cd cli; go build -o ../build/cli
 
+.PHONY: gen_enrollment # ./build/cli create_enrollment
 gen_enrollment: cli
-	./build/cli --gen_enrollment
+	./build/cli create_enrollment
+
+.PHONY: enrollment_endpoint # docker build -f app/images/enroll/Dockerfile
+enrollment_endpoint: # TODO(discentem) improve hardcoded assumption about where mdm_push_cert.pem is sourced from
+	cd ..; docker buildx build --platform=linux/amd64 . -f nanomdmsandbox/app/images/enroll/Dockerfile
 
 .PHONY: .check-args
