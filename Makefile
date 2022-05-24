@@ -105,6 +105,11 @@ tf-apply:
 tf-apply-refresh:
 	terraform -chdir=$(TERRAFORM_DIR) apply -refresh-only
 
+.PHONY: tf-init-migrate # Runs tf-init -migrate-state
+tf-init-migrate:
+	terraform -chdir=$(TERRAFORM_DIR) init -migrate-state
+
+
 # terraform destroy
 #
 #
