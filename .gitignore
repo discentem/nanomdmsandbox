@@ -34,3 +34,6 @@ cmd/cmd
 app/enrollment.mobileconfig
 enrollment/enrollment.mobileconfig
 enrollment.mobileconfig
+
+# config
+app/config/*

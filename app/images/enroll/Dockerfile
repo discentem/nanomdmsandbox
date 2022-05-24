@@ -21,13 +21,22 @@ RUN go build -o /enroll-endpoint
 ##
 FROM --platform=linux/amd64 gcr.io/distroless/base-debian10
 
-WORKDIR /
+ARG BASE_URL
+ENV BASE_URL $BASE_URL
 
-COPY --from=build /enroll-endpoint /enroll-endpoint
+ARG COMPANY
+ENV COMPANY $COMPANY
+
+ARG SCEP_CHALLENGE
+ENV SCEP_CHALLENGE $SCEP_CHALLENGE
+
+WORKDIR /service/enroll_endpoint
+
+COPY --from=build /enroll-endpoint /service/enroll_endpoint/enroll-endpoint
 # COPY --from=build /mdm_push_cert.pem /mdm_push_cert.pem
 
-COPY micromdm/mdm_push_cert.pem /mdm_push_cert.pem
+COPY ../../config/certs/mdm_push_cert.pem /service/enrollment_endpoint/mdm_push_cert.pem
 
 EXPOSE 9203
 
-ENTRYPOINT ["/enroll-endpoint", "--push_pem_path", "/mdm_push_cert.pem", "enrollment_endpoint", "--port", "9203", "--base_url", "mdm.bkurtz.cloud", "--company", "bkurtz.cloud", "--scep_challenge", "ThisIsAChallenge"]
+CMD ["enroll-endpoint", "--push_pem_path", "mdm_push_cert.pem", "enrollment_endpoint", "--port", "9203", "--base_url", $BASE_URL, "--company", $COMPANY, "--scep_challenge", $SCEP_CHALLENGE]

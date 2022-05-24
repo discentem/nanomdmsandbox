@@ -71,4 +71,20 @@ services:
       - micro2nano
       - nanomdm
       - redis
+  enroll_endpoint:
+    image: enroll_endpoint
+    volumes:
+      - ../config/certs/mdm_push_cert.pem:/service/enroll_endpoint/mdm_push_cert.pem
+    build:
+      context: .
+      dockerfile: ./images/enroll/Dockerfile
+      args:
+        - PUSH_PEM_PATH
+    ports:
+      - "8000:8000"
+    depends_on:
+      - micro2nano
+      - nanomdm
+      - redis
+
 
