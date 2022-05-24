@@ -23,16 +23,6 @@ variable "allowed_cidr_blocks" {
   type        = list(string)
 }
 
-# variable "allowed_security_groups" {
-#   description = "A list of allowed security groups that can reach the RDS instances"
-#   type        = list(string)
-# }
-
-# variable "identifier" {
-#   description = "The name of the RDS instance"
-#   type        = string
-# }
-
 variable "allocated_storage" {
   description = "The allocated storage in gigabytes"
   type        = string
@@ -158,18 +148,6 @@ variable "port" {
   type        = string
   default     = null
 }
-
-# variable "vpc_security_group_ids" {
-#   description = "List of VPC security groups to associate"
-#   type        = list(string)
-#   default     = []
-# }
-
-# variable "ecs_service_security_group_id" {
-#   description = ""
-#   type        = string
-#   default     = null
-# }
 
 variable "availability_zone" {
   description = "The Availability Zone of the RDS instance"

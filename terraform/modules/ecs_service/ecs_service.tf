@@ -39,17 +39,6 @@ module "nanomdm" {
     }
   }
 
-
-
-#     "logConfiguration": {
-#       "logDriver": "awslogs",
-#       "options": {
-#         "awslogs-group": "${aws_cloudwatch_log_group.main.name}",
-#         "awslogs-region": "${data.aws_region.current.name}",
-#         "awslogs-stream-prefix": "ecs"
-#       }
-#     },
-
   secrets = [
     {
       "name": "MYSQL_PASSWORD",
@@ -137,11 +126,93 @@ module "micro2nano" {
     }
   }
 
-
   environment = local.task_environment
 
   memory = var.micro2nano_task_definition_memory
   cpu    = var.micro2nano_task_definition_cpu
+
+  register_task_definition = false
+}
+
+// MDMDirector Task Definition //
+module "mdmdirector" {
+  source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-mdmdirector"
+
+  image     = "${var.mdmdirector_container_image}"
+  essential = true
+
+  portMappings = [
+    {
+      containerPort =  var.mdmdirector_app_port
+      hostPort = var.mdmdirector_app_port
+      protocol = "tcp"
+    },
+  ]
+
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+  secrets = [
+    {
+      "name": "DB_PASSWORD",
+      "valueFrom": "${var.psql_secrets_manager_arn}:PSQL_PASSWORD::"
+    },
+    {
+      "name": "DB_USERNAME",
+      "valueFrom": "${var.psql_secrets_manager_arn}:PSQL_USERNAME::"
+    },
+    {
+      "name": "DB_HOSTNAME",
+      "valueFrom": "${var.psql_secrets_manager_arn}:PSQL_HOSTNAME::"
+    }
+  ]
+
+  environment = local.task_environment
+
+  memory = var.mdmdirector_task_definition_memory
+  cpu    = var.mdmdirector_task_definition_cpu
+
+  register_task_definition = false
+}
+
+// Redis Task Definition //
+module "redis" {
+  source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-redis"
+
+  image     = "redis"
+  essential = true
+
+  portMappings = [
+    {
+      containerPort =  6379
+      hostPort = 6379
+      protocol = "tcp"
+    },
+  ]
+
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+  environment = local.task_environment
+
+  memory = var.default_task_definition_memory
+  cpu    = var.default_task_definition_cpu
 
   register_task_definition = false
 }
@@ -154,7 +225,9 @@ module "merged" {
  container_definitions = [
    "${module.nanomdm.container_definitions}",
    "${module.scep.container_definitions}",
-   "${module.micro2nano.container_definitions}"
+   "${module.micro2nano.container_definitions}",
+   "${module.mdmdirector.container_definitions}",
+   "${module.redis.container_definitions}",
  ]
 }
 
@@ -236,7 +309,7 @@ resource "aws_ecs_task_definition" "task" {
 }
 
 resource "aws_ecs_service" "service" {
-  name = var.prefix
+  name = var.app_name
 
   cluster         = var.cluster_id
   task_definition = "${aws_ecs_task_definition.task.family}:${max(aws_ecs_task_definition.task.revision, data.aws_ecs_task_definition.task.revision)}"
@@ -279,7 +352,7 @@ resource "aws_ecs_service" "service" {
   #   }
   # }
 
-  // Load Balancers for NanoMDM and SCEP //
+  // Load Balancers for all services //
 
   load_balancer {
     target_group_arn = aws_alb_target_group.nanomdm.arn
@@ -293,10 +366,16 @@ resource "aws_ecs_service" "service" {
     container_port   = var.scep_app_port
   }
 
+  # load_balancer {
+  #   target_group_arn = aws_alb_target_group.micro2nano.arn
+  #   container_name   = "${var.app_name}-micro2nano"
+  #   container_port   = var.micro2nano_app_port
+  # }
+
   load_balancer {
-    target_group_arn = aws_alb_target_group.micro2nano.arn
-    container_name   = "${var.app_name}-micro2nano"
-    container_port   = var.micro2nano_app_port
+    target_group_arn = aws_alb_target_group.mdmdirector.arn
+    container_name   = "${var.app_name}-mdmdirector"
+    container_port   = var.mdmdirector_app_port
   }
 
 

@@ -124,3 +124,9 @@ output "db_instance_cloudwatch_log_groups" {
   description = "Map of CloudWatch log groups created and their attributes"
   value       = module.rds_mysql.db_instance_cloudwatch_log_groups
 }
+
+# aws_security_group
+output "security_group_id" {
+  description = "The security group ID of the cluster"
+  value       = module.security_group.security_group_id
+}
