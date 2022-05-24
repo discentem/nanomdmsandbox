@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>PayloadContent</key>
+    <array>
+      <dict>
+        <key>PayloadContent</key>
+        <dict>
+          <key>Key Type</key>
+          <string>RSA</string>
+          <key>Key Usage</key>
+          <integer>5</integer>
+          <key>Keysize</key>
+          <integer>2048</integer>
+          <key>Name</key>
+          <string>Device Management Identity Certificate</string>
+          <key>URL</key>
+          <string>https:///scep</string>
+        </dict>
+        <key>PayloadDescription</key>
+        <string>Configures SCEP</string>
+        <key>PayloadDisplayName</key>
+        <string>SCEP</string>
+        <key>PayloadIdentifier</key>
+        <string>com..nanomdm.scep</string>
+        <key>PayloadOrganization</key>
+        <string></string>
+        <key>PayloadScope</key>
+        <string>System</string>
+        <key>PayloadType</key>
+        <string>com.apple.security.scep</string>
+        <key>PayloadUUID</key>
+        <string>b606b3eb-5081-4ee6-97ca-9b5906baa6cc</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+      </dict>
+      <dict>
+        <key>AccessRights</key>
+        <integer>8191</integer>
+        <key>CheckInURL</key>
+        <string>https:///mdm</string>
+        <key>CheckOutWhenRemoved</key><true/>
+        <key>IdentityCertificateUUID</key>
+        <string>b606b3eb-5081-4ee6-97ca-9b5906baa6cc</string>
+        <key>PayloadDescription</key>
+        <string>Enrolls with the MDM server</string>
+        <key>PayloadDisplayName</key>
+        <string></string>
+        <key>PayloadIdentifier</key>
+        <string>com..nanomdm.mdm</string>
+        <key>PayloadOrganization</key>
+        <string></string>
+        <key>PayloadScope</key>
+        <string>System</string>
+        <key>PayloadType</key>
+        <string>com.apple.mdm</string>
+        <key>PayloadUUID</key>
+        <string>f0379d8e-dc80-4432-ace9-af0686e111ac</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+        <key>ServerCapabilities</key>
+        <array>
+          <string>com.apple.mdm.per-user-connections</string>
+          <string>com.apple.mdm.bootstraptoken</string>
+        </array>
+        <key>ServerURL</key>
+        <string>https:///mdm</string>
+        <key>SignMessage</key><true/>
+        <key>Topic</key>
+        <string>com.apple.mgmt.External.698af2c4-e35f-42c8-bd22-c25839fb34c2</string>
+      </dict>
+    </array>
+    <key>PayloadDescription</key>
+    <string>The server may alter your settings</string>
+    <key>PayloadDisplayName</key>
+    <string>Enrollment Profile</string>
+    <key>PayloadIdentifier</key>
+    <string>com..nanomdm.scep</string>
+    <key>PayloadOrganization</key>
+    <string></string>
+    <key>PayloadScope</key>
+    <string>System</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>5399d055-9f0c-4a00-aee3-45fb870a3d6d</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+  </dict>
+</plist>

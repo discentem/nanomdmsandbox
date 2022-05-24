@@ -3,8 +3,12 @@ terraform {
   backend "local" {}
 }
 
+resource "random_id" "rand_id" {
+  byte_length = 8
+}
+
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "${var.prefix}-${var.app_name}-terraform-state"
+  bucket = "${var.app_name}-terraform-state-${random_id.rand_id.hex}"
 }
 
 resource "aws_s3_bucket_versioning" "versioning" {
