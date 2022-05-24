@@ -10,6 +10,15 @@ resource "aws_security_group" "lb" {
   )
 
   ingress {
+    from_port         = 80
+    to_port           = 80
+    protocol          = "tcp"
+    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+    # ipv6_cidr_blocks  = ["::/0"]
+    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  }
+
+  ingress {
     from_port         = 443
     to_port           = 443
     protocol          = "tcp"
@@ -19,33 +28,41 @@ resource "aws_security_group" "lb" {
   }
 
 
-  ingress {
-    from_port         = var.nanomdm_app_port
-    to_port           = var.nanomdm_app_port
-    protocol          = "tcp"
-    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
-    # ipv6_cidr_blocks  = ["::/0"]
-    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
-  }
+  # ingress {
+  #   from_port         = var.nanomdm_app_port
+  #   to_port           = var.nanomdm_app_port
+  #   protocol          = "tcp"
+  #   cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+  #   # ipv6_cidr_blocks  = ["::/0"]
+  #   # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  # }
 
-  ingress {
-    from_port         = var.scep_app_port
-    to_port           = var.scep_app_port
-    protocol          = "tcp"
-    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
-    # ipv6_cidr_blocks  = ["::/0"]
-    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
-  }
+  # ingress {
+  #   from_port         = var.scep_app_port
+  #   to_port           = var.scep_app_port
+  #   protocol          = "tcp"
+  #   cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+  #   # ipv6_cidr_blocks  = ["::/0"]
+  #   # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  # }
   
-  ingress {
-    from_port         = var.micro2nano_app_port
-    to_port           = var.micro2nano_app_port
-    protocol          = "tcp"
-    cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
-    # ipv6_cidr_blocks  = ["::/0"]
-    # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
-  }
+  # ingress {
+  #   from_port         = var.micro2nano_app_port
+  #   to_port           = var.micro2nano_app_port
+  #   protocol          = "tcp"
+  #   cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+  #   # ipv6_cidr_blocks  = ["::/0"]
+  #   # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  # }
 
+  # ingress {
+  #   from_port         = var.mdmdirector_app_port
+  #   to_port           = var.mdmdirector_app_port
+  #   protocol          = "tcp"
+  #   cidr_blocks       = var.public_inbound_cidr_blocks_ipv4
+  #   # ipv6_cidr_blocks  = ["::/0"]
+  #   # ipv6_cidr_blocks = var.public_inbound_cidr_blocks_ipv6
+  # }
 
 
   egress {
@@ -73,14 +90,6 @@ resource "aws_security_group" "ecs_service" {
       Name = "${local.prefix_app_name}-ecs-service-sg"
     },
   )
-
-  # egress {
-  #   from_port        = 0
-  #   to_port          = 0
-  #   protocol         = "-1"
-  #   cidr_blocks      = ["0.0.0.0/0"]
-  #   ipv6_cidr_blocks = ["::/0"]
-  # }
 
   lifecycle {
     create_before_destroy = true
@@ -114,6 +123,15 @@ resource "aws_security_group_rule" "micro2nano_ingress_ecs_service" {
   source_security_group_id = aws_security_group.lb.id
 }
 
+resource "aws_security_group_rule" "mdmdirector_ingress_ecs_service" {
+  security_group_id = aws_security_group.ecs_service.id
+  type              = "ingress"
+  protocol          = "tcp"
+  from_port         = var.mdmdirector_app_port
+  to_port           = var.mdmdirector_app_port
+  source_security_group_id = aws_security_group.lb.id
+}
+
 resource "aws_security_group_rule" "https_ingress_ecs_service" {
   security_group_id = aws_security_group.ecs_service.id
   type              = "ingress"
@@ -135,8 +153,8 @@ resource "aws_security_group_rule" "http_ingress_ecs_service" {
 resource "aws_security_group_rule" "egress_allow_all" {
   security_group_id = aws_security_group.ecs_service.id
   type              = "egress"
-  to_port           = 0
   protocol          = "-1"
+  to_port           = 0
   from_port         = 0
-  source_security_group_id = aws_security_group.lb.id
+  cidr_blocks       = ["0.0.0.0/0"]
 }

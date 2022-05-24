@@ -17,11 +17,12 @@ module "rds_mysql" {
   identifier = "${var.app_name}-rds"
 
   engine            = "mysql"
-# 8.0.19 minimum required version for current sql syntax
+  # 8.0.19 minimum required version for current sql syntax
   engine_version    = "8.0.19"
   instance_class    = "db.t3.micro"
   allocated_storage = 10
 
+  db_name  = var.db_name
   username = "root"
   password = local.password
   port     = "3306"

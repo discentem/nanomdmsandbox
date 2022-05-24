@@ -14,6 +14,7 @@ package
 *.tfstate
 *.tfstate.backup
 *.terraform.tfstate.lock.info
+*backend.tf
 
 # MacOS
 .DS_Store
@@ -31,4 +32,5 @@ cmd/cmd
 
 # mdm
 app/enrollment.mobileconfig
+enrollment/enrollment.mobileconfig
 enrollment.mobileconfig

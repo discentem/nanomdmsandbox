@@ -29,6 +29,12 @@ module "micro2nano_ecr" {
   image_tag_mutability = var.image_tag_mutability
 }
 
+module "mdmdirector_ecr" {
+  source               = "./modules/ecr"
+  repository_name      = var.mdmdirector_repository_name
+  image_tag_mutability = var.image_tag_mutability
+}
+
 module "route53" {
   source      = "./modules/route53"
   domain_name = var.domain_name
@@ -39,12 +45,6 @@ module "vpc" {
   version = "~> 3.0"
 
   name = var.app_name
-  # cidr = "10.99.0.0/18"
-
-  # azs              = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
-  # public_subnets   = ["10.99.0.0/24", "10.99.1.0/24", "10.99.2.0/24"]
-  # private_subnets  = ["10.99.3.0/24", "10.99.4.0/24", "10.99.5.0/24"]
-  # database_subnets = ["10.99.7.0/24", "10.99.8.0/24", "10.99.9.0/24"]
   
   cidr = var.vpc_cidr
 
@@ -71,21 +71,47 @@ module "ecs_cluster" {
   app_name = var.app_name
 }
 
-# module "rds_auora" {
-#   source = "./modules/rds_aurora"
+resource "random_password" "psql_rds_master_password" {
+  length  = "20"
+  special = false
+}
 
-#   app_name = var.app_name
+module "rds_aurora_psql_mdmdirector" {
+  source = "./modules/rds_aurora"
 
-#   aws_region          = var.aws_region
-#   vpc_id              = module.vpc.vpc_id
-#   database_subnets    = module.vpc.database_subnets
-#   allowed_cidr_blocks = module.vpc.private_subnets_cidr_blocks
-# }
+  app_name = var.app_name
+  database_name = "mdmdirector"
+
+  aws_region          = var.aws_region
+  vpc_id              = module.vpc.vpc_id
+  database_subnets    = module.vpc.database_subnets
+  allowed_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+
+  create_random_password = false
+  master_password = random_password.psql_rds_master_password.result
+}
+
+module "rds_aurora_psql_mdmdirector_secret" {
+  source = "./modules/secrets"
+
+  name   = "rds_aurora_psql_mdmdirector"
+
+  aws_region           = var.aws_region
+  aws_account_id       = data.aws_caller_identity.current.account_id
+  
+  secret_string        = jsonencode(
+  { 
+    PSQL_USERNAME = module.rds_aurora_psql_mdmdirector.cluster_master_username,
+    PSQL_PASSWORD = module.rds_aurora_psql_mdmdirector.cluster_master_password,
+    PSQL_HOSTNAME = module.rds_aurora_psql_mdmdirector.cluster_endpoint,
+  })
+}
 
 module "rds" {
   source = "./modules/rds"
 
   app_name = var.app_name
+  db_name = "nanomdm"
 
   aws_region          = var.aws_region
   vpc_id              = module.vpc.vpc_id
@@ -94,6 +120,7 @@ module "rds" {
   
   create_db_instance  = true
 
+  create_random_password = false
   password = random_password.mysql_rds_master_password.result
 }
 
@@ -158,7 +185,6 @@ module "rds_secret" {
   )
   # secret_string        = jsonencode({ MYSQL_USERNAME = module.rds.mysql_cluster_master_username, MYSQL_PASSWORD = module.rds.mysql_cluster_master_password})
 }
-
 module "acm_lb_certificate" {
   source = "./modules/acm"
   domain_name = "mdm-infra.${var.domain_name}"
@@ -183,11 +209,10 @@ module "ecs_nanomdm" {
   zone_id     = module.route53.zone_id
   certificate_arn = module.acm_lb_certificate.acm_certificate_arn
 
-  container_definition_cpu = 512
-  container_definition_memory = 1024
+  container_definition_cpu = 1024
+  container_definition_memory = 2048
 
-  // SCEP TASKs //
-
+  // SCEP tasks //
   scep_container_image = "${module.scep_ecr.repository_url}:latest"
   scep_app_port        = 8080
 
@@ -206,8 +231,7 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
-  // NanoMDM TASKs //
-
+  // NanoMDM tasks //
   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}:latest"
   nanomdm_app_port        = 9000
 
@@ -230,31 +254,49 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
-  // Public CIDRs to allow access to the load balancers //
+  // MDMDirector tasks //
+  mdmdirector_container_image = "${module.mdmdirector_ecr.repository_url}:latest"
+  mdmdirector_app_port        = 8000
 
-  public_inbound_cidr_blocks_ipv4 = var.public_inbound_cidr_blocks_ipv4
-  public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
+  psql_secrets_manager_arn = module.rds_aurora_psql_mdmdirector_secret.arn
+  mdmdirector_task_container_environment = {
+    APP_NAME       = var.app_name
+  }
 
-  # depends_on = [module.push_docker_images]
-
-  micro2nano_container_image = "${module.micro2nano_ecr.repository_url}:latest"
-  micro2nano_app_port        = 9001
-
-  # scep_task_mount_points = { sourceVolume = string, containerPath = string, readOnly = bool }
-  micro2nano_task_definition_cpu    = 128
-  micro2nano_task_definition_memory = 256
-
-  micro2nano_health_check = {
+  mdmdirector_task_definition_cpu    = 128
+  mdmdirector_task_definition_memory = 256
+  mdmdirector_health_check = {
     port                = "traffic-port"
-    path                = "/v1/commands"
+    path                = "/health"
     health_threshold    = "3"
     interval            = "60"
     protocol            = "HTTP"
-    matcher             = "401"
+    matcher             = "200"
     timeout             = "3"
     unhealthy_threshold = "2"
   }
 
+  // micro2nano tasks //
+  micro2nano_container_image = "${module.micro2nano_ecr.repository_url}:latest"
+  micro2nano_app_port        = 9001
+
+  micro2nano_task_definition_cpu    = 128
+  micro2nano_task_definition_memory = 256
+
+  # micro2nano_health_check = {
+  #   port                = "traffic-port"
+  #   path                = "/v1/commands"
+  #   health_threshold    = "3"
+  #   interval            = "60"
+  #   protocol            = "HTTP"
+  #   matcher             = "401"
+  #   timeout             = "3"
+  #   unhealthy_threshold = "2"
+  # }
+
+  // Public CIDRs to allow access to the load balancers //
+  public_inbound_cidr_blocks_ipv4 = var.public_inbound_cidr_blocks_ipv4
+  public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
 }
 
 # module "push_docker_images" {
