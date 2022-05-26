@@ -36,4 +36,4 @@ enrollment/enrollment.mobileconfig
 enrollment.mobileconfig
 
 # config
-app/config/*
+docker/config/*
