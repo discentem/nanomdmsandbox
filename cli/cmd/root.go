@@ -5,11 +5,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/micromdm/go4/env"
-	"github.com/spf13/cobra"
-
-	mysql "github.com/go-sql-driver/mysql"
+	"github.com/discentem/nanomdmsandbox/cli/pkg/env"
+	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -18,6 +17,9 @@ var (
 	scepChallenge string
 	pathToPem     string
 	port          string
+	cfppath       string
+	deviceUUID    string
+	password      string
 )
 
 var rootCmd = &cobra.Command{
@@ -38,7 +40,12 @@ func init() {
 	rootCmd.AddCommand(createEnrollment)
 
 	enrollEndpoint.Flags().StringVar(&port, "port", "9300", "port for enroll endpoint")
+
+	pushProfile.Flags().StringVar(&cfppath, "path", "app/desktop-setting.mobileconfig", "path to profile to push to director")
+	pushProfile.Flags().StringVar(&deviceUUID, "device", "", "device UUID to push profile to")
+	pushProfile.Flags().StringVar(&password, "password", env.String("MDMDIRECTOR_PASSWORD", ""), "pass for mdmdirector post requests")
 	rootCmd.AddCommand(enrollEndpoint)
+	rootCmd.AddCommand(pushProfile)
 
 }
 

@@ -6,7 +6,6 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/groob/plist v0.0.0-20220217120414-63fa881b19a5
 	github.com/manifoldco/promptui v0.9.0
-	github.com/micromdm/go4 v0.0.0-20210104222236-8a0936d9e451
 	github.com/micromdm/micromdm v1.9.0
 	github.com/micromdm/nanomdm v0.2.0
 	github.com/pkg/errors v0.9.1
