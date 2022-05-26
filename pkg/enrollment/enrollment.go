@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/micromdm/micromdm/mdm/enroll"
@@ -39,18 +40,25 @@ type EnrollmentOpts struct {
 }
 
 func EnrollmentProfile(serverURL, company, scepChallenge, pathToPem string) (*enroll.Profile, error) {
-	return EnrollmentOpts{
+	enrollmentOpts := EnrollmentOpts{
 		serverURL:     serverURL,
 		company:       company,
 		scepChallenge: scepChallenge,
 		pathToPem:     pathToPem,
-	}.EnrollmentProfile()
+	}
+
+	return enrollmentOpts.EnrollmentProfile()
 }
 
 func (opts EnrollmentOpts) EnrollmentProfile() (*enroll.Profile, error) {
 	if opts.pathToPem == "" {
 		return nil, errors.New("opts.pathToPem must be provided")
 	}
+
+	if _, err := os.Stat(opts.pathToPem); errors.Is(err, os.ErrNotExist) {
+		return nil, errors.New("opts.pathToPem does not exist")
+	}
+
 	b, err := ioutil.ReadFile(opts.pathToPem)
 	if err != nil {
 		return nil, err

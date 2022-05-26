@@ -10,6 +10,10 @@ TERRAFORM_REMOTE_STATE_INIT_DIR := $(shell pwd)/terraform/remote_state
 
 APP_DIR := app
 
+BUILD_DIR := $(CURRENT_DIR)/build
+
+CMD_DIR := $(CURRENT_DIR)/cmd
+
 CONTAINERS_PREFIX = nanomdm
 CONTAINERS_DIR = $(APP_DIR)/images
 
@@ -163,14 +167,24 @@ ecs-update-service: .check-args-ecs-update-service
 	aws ecs update-service --cluster $(CLUSTER) --service $(SERVICE) --desired-count 1 --force-new-deployment --enable-execute-command
 
 
+
+# golang - deps
+#
+#
+.PHONY: deps # go mod download and go mod tidy
+deps:
+	@go mod download
+	@go mod tidy
+
 # golang - cli
 #
 #
 .PHONY: cli # go build
-cli: # go build
-	go build -o build/cli ./cmd/main.go
+cli: deps # go build
+	cd $(CMD_DIR)/cli; go build -o $(BUILD_DIR)/cli
 
+.PHONY: gen_enrollment # ./build/cli create_enrollment
 gen_enrollment: cli
-	./build/cli --gen_enrollment
+	./build/cli create_enrollment
 
 .PHONY: .check-args

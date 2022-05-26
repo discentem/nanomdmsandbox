@@ -4,10 +4,10 @@ services:
   scep:
     image: scep
     volumes:
-      - ./config/certs/depot:/service/scep/depot
+      - ./docker/config/certs/depot:/service/scep/depot
     build:
       context: .
-      dockerfile: ./images/scep/Dockerfile
+      dockerfile: ./docker/scep/Dockerfile
       args:
         - SCEP_VERSION=2.1.0
         - CHALLENGE=ThisIsAChallenge
@@ -19,23 +19,23 @@ services:
     container_name: nanomdm
     image: nanomdm
     volumes:
-      - ../config/certs/depot/ca.pem:/service/nanomdm/ca.pem
+      - ./docker/config/certs/depot/ca.pem:/service/nanomdm/ca.pem
     build:
       context: .
-      dockerfile: ./images/nanomdm/Dockerfile
+      dockerfile: ./docker/nanomdm/Dockerfile
       args:
         - NANOMDM_VERSION=0.2.0
         - API_KEY=nanomdm
     ports:
       - "9000:9000"
-
     depends_on:
       - scep
+
   micro2nano:
     image: micro2nano
     build:
       context: .
-      dockerfile: ./images/micro2nano/Dockerfile
+      dockerfile: ./docker/micro2nano/Dockerfile
       args:
         - VERSION=0.2.0
         - MICROMDM_API_KEY=nanomdm
@@ -56,7 +56,7 @@ services:
     image: mdmdirector
     build:
       context: .
-      dockerfile: ./images/mdmdirector/Dockerfile
+      dockerfile: ./docker/mdmdirector/Dockerfile
       args:
         - VERSION=0.3.1
         - DB_NAME=mdmdirector
@@ -71,4 +71,21 @@ services:
       - micro2nano
       - nanomdm
       - redis
+
+  enroll_endpoint:
+    image: enroll_endpoint
+    build:
+      context: .
+      dockerfile: ./docker/enroll_endpoint/Dockerfile
+      args:
+        - BASE_URL=https://localhost/
+        - COMPANY=corporation
+        - SCEP_CHALLENGE=ThisIsAChallenge
+    ports:
+      - "9300:9300"
+    volumes:
+      - ./docker/config/certs/mdm_push_cert.pem:/service/enroll_endpoint/mdm_push_cert.pem
+    depends_on:
+      - nanomdm
+
 

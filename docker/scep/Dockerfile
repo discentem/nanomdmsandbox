@@ -14,7 +14,7 @@ ENV ALLOW_RENEW $ALLOW_RENEW
 
 WORKDIR /service/scep
 
-COPY ../../config/certs/depot /service/scep/depot
+COPY ./docker/config/certs/depot /service/scep/depot
 
 RUN curl -RLO https://github.com/micromdm/scep/releases/download/v$SCEP_VERSION/scepserver-linux-amd64-v$SCEP_VERSION.zip
 
