@@ -83,8 +83,8 @@ services:
         - SCEP_CHALLENGE=ThisIsAChallenge
     ports:
       - "9300:9300"
-    # volumes:
-    #   - ./config/certs/mdm_push_cert.pem:/service/enroll_endpoint/mdm_push_cert.pem
+    volumes:
+      - ./docker/config/certs/mdm_push_cert.pem:/service/enroll_endpoint/mdm_push_cert.pem
     depends_on:
       - nanomdm
 
