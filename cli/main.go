@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/discentem/nanomdmsandbox/cli/cmd"
+	"github.com/discentem/nanomdmsandbox/internal/cli"
 )
 
 func main() {
-	cmd.Execute()
+	cli.Execute()
 }

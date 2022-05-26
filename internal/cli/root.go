@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/discentem/nanomdmsandbox/cli/pkg/env"
+	"github.com/discentem/nanomdmsandbox/pkg/env"
 	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"

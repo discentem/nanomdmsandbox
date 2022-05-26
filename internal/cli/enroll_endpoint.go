@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/discentem/nanomdmsandbox/cli/pkg/enrollment"
+	"github.com/discentem/nanomdmsandbox/pkg/enrollment"
 	"github.com/groob/plist"
 	"github.com/spf13/cobra"
 )
