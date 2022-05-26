@@ -1,0 +1,91 @@
+version: "3.7"
+
+services:
+  scep:
+    image: scep
+    volumes:
+      - ./docker/config/certs/depot:/service/scep/depot
+    build:
+      context: .
+      dockerfile: ./docker/scep/Dockerfile
+      args:
+        - SCEP_VERSION=2.1.0
+        - CHALLENGE=ThisIsAChallenge
+        - ALLOW_RENEW=0
+    ports:
+      - "8080:8080"
+
+  nanomdm:
+    container_name: nanomdm
+    image: nanomdm
+    volumes:
+      - ./docker/config/certs/depot/ca.pem:/service/nanomdm/ca.pem
+    build:
+      context: .
+      dockerfile: ./docker/nanomdm/Dockerfile
+      args:
+        - NANOMDM_VERSION=0.2.0
+        - API_KEY=nanomdm
+    ports:
+      - "9000:9000"
+    depends_on:
+      - scep
+
+  micro2nano:
+    image: micro2nano
+    build:
+      context: .
+      dockerfile: ./docker/micro2nano/Dockerfile
+      args:
+        - VERSION=0.2.0
+        - MICROMDM_API_KEY=nanomdm
+        - NANO_API_KEY=nanomdm
+        - NANO_URL=http://127.0.0.1:9000/v1/enqueue
+    ports:
+      - "9001:9001"
+    depends_on:
+      - nanomdm
+
+  redis:
+    image: "redis:alpine"
+    hostname: redis
+    ports:
+      - "6379:6379"
+
+  mdmdirector:
+    image: mdmdirector
+    build:
+      context: .
+      dockerfile: ./docker/mdmdirector/Dockerfile
+      args:
+        - VERSION=0.3.1
+        - DB_NAME=mdmdirector
+        - DB_HOSTNAME=localhost
+        - DB_PORT=5432
+        - MICROMDM_API_KEY=nanomdm
+        - MICROMDM_URL=http://localhost:9001
+        - MDMDIRECTOR_API_KEY=mdmdirector
+    ports:
+      - "8000:8000"
+    depends_on:
+      - micro2nano
+      - nanomdm
+      - redis
+
+  enroll_endpoint:
+    image: enroll_endpoint
+    build:
+      context: .
+      dockerfile: ./docker/enroll_endpoint/Dockerfile
+      args:
+        - BASE_URL=https://localhost/
+        - COMPANY=corporation
+        - SCEP_CHALLENGE=ThisIsAChallenge
+    ports:
+      - "9300:9300"
+    # volumes:
+    #   - ./config/certs/mdm_push_cert.pem:/service/enroll_endpoint/mdm_push_cert.pem
+    depends_on:
+      - nanomdm
+
+
