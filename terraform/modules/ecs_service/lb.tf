@@ -167,7 +167,7 @@ resource "aws_alb_listener_rule" "nanomdm" {
 
   condition {
     path_pattern {
-      values = ["/version", "/v1/pushcert", "/v1/push/*", "/v1/enqueue/*"]
+      values = ["/mdm*", "/version", "/v1/pushcert", "/v1/push/*", "/v1/enqueue/*"]
     }
   }
 
@@ -221,7 +221,7 @@ resource "aws_alb_listener_rule" "mdmdirector" {
 
   condition {
     path_pattern {
-      values = ["/v1/commands", "/v1/commands/*"]
+      values = ["/command*", "/device*", "/installapplication", "/profile*", "/webhook"]
     }
   }
 }
