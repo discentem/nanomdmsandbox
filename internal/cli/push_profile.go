@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -19,12 +18,13 @@ var pushProfile = &cobra.Command{
 	Short: "p",
 	Long:  `push profile`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return push_profile(baseMDMURL, cfppath, deviceUUID)
+		// return push_profile(baseMDMURL, cfppath, deviceUUID)
+		return push_profile(baseMDMURL, cfppath, "14883E92-41E0-5E4D-B2D7-C65B289CEF20")
 	},
 }
 
 type mdmDirectorProfilePayload struct {
-	UUIDs    []string `json:"uuids"`
+	UDIDs    []string `json:"udids"`
 	Profiles []string `json:"profiles"`
 	PushNow  bool     `json:"push_now"`
 }
@@ -36,40 +36,37 @@ func push_profile(mdmdirectorBaseUrl, profilePath, uuid string) error {
 	}
 	bep := base64.StdEncoding.EncodeToString(b)
 
+	if deviceUUID == "" {
+		deviceUUID = "*"
+	}
 	jsonData, err := json.Marshal(mdmDirectorProfilePayload{
-		UUIDs:    []string{"*"},
+		UDIDs:    []string{deviceUUID},
 		Profiles: []string{bep},
 		PushNow:  true,
 	})
 	if err != nil {
 		return err
 	}
-
-	/*
-	   payload = {"udids": ["*"], "profiles": profiles, "push_now": False}
-
-	       print(payload)
-	       profile_url = "{}/profile".format(url)
-	       try:
-	           r = requests.post(profile_url, json=payload, auth=("mdmdirector", password))
-	       except Exception as e:
-	           print(r.status_code)
-	           print(e)
-	*/
+	fmt.Println(string(jsonData))
 
 	if !strings.Contains(mdmdirectorBaseUrl, "https://") {
 		mdmdirectorBaseUrl = "https://" + mdmdirectorBaseUrl
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/profile", mdmdirectorBaseUrl), bytes.NewBuffer(jsonData))
+	// req, err := http.NewRequest("POST", fmt.Sprintf("%s/profile/", mdmdirectorBaseUrl), bytes.NewBuffer(jsonData))
+	// if err != nil {
+	// 	return err
+	// }
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/profile/%s", mdmdirectorBaseUrl, deviceUUID), nil)
 	if err != nil {
 		return err
 	}
+
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	req.SetBasicAuth("mdmdirector", password)
 	client := &http.Client{}
-	response, error := client.Do(req)
-	if error != nil {
-		panic(error)
+	response, err := client.Do(req)
+	if err != nil {
+		return err
 	}
 	defer response.Body.Close()
 
