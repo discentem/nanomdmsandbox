@@ -44,6 +44,8 @@ variable "container_definition_memory" {
   default     = null
   type        = number
 }
+
+// SCEP //
 variable "scep_container_image" {
   description = "The SCEP image used to start a container."
   type        = string
@@ -67,11 +69,16 @@ variable "scep_task_definition_memory" {
   type        = number
 }
 
+variable "scep_health_check" {
+  description = "A health block containing health check settings for the target group. Overrides the defaults."
+  type        = map(string)
+}
+
+// NanoMDM //
 variable "nanomdm_container_image" {
   description = "The nanomdm image used to start a container."
   type        = string
 }
-
 variable "nanomdm_app_port" {
   description = "The nanomdm app port used for the container."
   type        = number
@@ -96,6 +103,13 @@ variable "nanomdm_task_container_environment" {
   type        = map(string)
 }
 
+variable "nanomdm_health_check" {
+  description = "A health block containing health check settings for the target group. Overrides the defaults."
+  type        = map(string)
+}
+
+
+// MDMDirector //
 variable "mdmdirector_task_definition_cpu" {
   description = "Amount of CPU to reserve for the task."
   default     = 256
@@ -124,6 +138,48 @@ variable "mdmdirector_app_port" {
   type        = number
   default     = 8000
 }
+
+variable "mdmdirector_health_check" {
+  description = "A health block containing health check settings for the target group. Overrides the defaults."
+  type        = map(string)
+}
+
+// Enroll Endpoint //
+variable "enroll_endpoint_task_definition_cpu" {
+  description = "Amount of CPU to reserve for the task."
+  default     = 128
+  type        = number
+}
+
+variable "enroll_endpoint_task_definition_memory" {
+  description = "The soft limit (in MiB) of memory to reserve for the task."
+  default     = 256
+  type        = number
+}
+
+variable "enroll_endpoint_task_container_environment" {
+  description = "The environment variables to pass to a enroll endpoint."
+  default     = {}
+  type        = map(string)
+}
+
+variable "enroll_endpoint_container_image" {
+  description = "The enroll endpoint image used to start a container."
+  type        = string
+}
+
+variable "enroll_endpoint_app_port" {
+  description = "The enroll endpoint app port used for the container."
+  type        = number
+  default     = 9300
+}
+
+variable "enroll_endpoint_health_check" {
+  description = "A health block containing health check settings for the target group. Overrides the defaults."
+  type        = map(string)
+}
+
+// Micro2Nano //
 
 variable "micro2nano_container_image" {
   description = "The micro2nano image used to start a container."
@@ -154,6 +210,12 @@ variable "micro2nano_task_container_environment" {
   type        = map(string)
 }
 
+# variable "micro2nano_health_check" {
+#   description = "A health block containing health check settings for the target group. Overrides the defaults."
+#   type        = map(string)
+# }
+
+// Default Task Definitions //
 variable "default_task_definition_cpu" {
   description = "Amount of CPU to reserve for the task."
   default     = 128
@@ -213,26 +275,6 @@ variable "log_retention_in_days" {
   description = "Number of days the logs will be retained in CloudWatch."
   default     = 30
   type        = number
-}
-
-variable "scep_health_check" {
-  description = "A health block containing health check settings for the target group. Overrides the defaults."
-  type        = map(string)
-}
-
-variable "nanomdm_health_check" {
-  description = "A health block containing health check settings for the target group. Overrides the defaults."
-  type        = map(string)
-}
-
-# variable "micro2nano_health_check" {
-#   description = "A health block containing health check settings for the target group. Overrides the defaults."
-#   type        = map(string)
-# }
-
-variable "mdmdirector_health_check" {
-  description = "A health block containing health check settings for the target group. Overrides the defaults."
-  type        = map(string)
 }
 
 variable "health_check_grace_period_seconds" {
@@ -427,12 +469,32 @@ variable "certificate_arn" {
 
 variable "mysql_secrets_manager_arn" {
   type        = string
-  description = ""
+  description = "MYSQL secrets manager ARN"
 }
 
 variable "psql_secrets_manager_arn" {
   type        = string
-  description = ""
+  description = "PSQL secrets manager ARN"
+}
+
+variable "scep_secrets_manager_arn" {
+  type        = string
+  description = "SCEP secrets manager ARN"
+}
+
+variable "nanomdm_secrets_manager_arn" {
+  type        = string
+  description = "nanomdm secrets manager ARN"
+}
+
+variable "micro2nano_secrets_manager_arn" {
+  type        = string
+  description = "micro2nano secrets manager ARN"
+}
+
+variable "mdmdirector_secrets_manager_arn" {
+  type        = string
+  description = "mdmdirector secrets manager ARN"
 }
 
 variable "public_inbound_cidr_blocks_ipv4" {

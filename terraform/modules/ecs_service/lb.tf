@@ -50,7 +50,6 @@ resource "aws_alb_target_group" "scep" {
 // NanoMDM target group //
 resource "aws_alb_target_group" "nanomdm" {
   name_prefix = "nanotg"
-  # name        = "${local.prefix_app_name}-nanomdm-tg"
   port        = var.nanomdm_app_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -78,7 +77,6 @@ resource "aws_alb_target_group" "nanomdm" {
 // micro2nano target group //
 # resource "aws_alb_target_group" "micro2nano" {
 #   name_prefix = "m2ntg"
-#   # name        = "${local.prefix_app_name}-nanomdm-tg"
 #   port        = var.micro2nano_app_port
 #   protocol    = "HTTP"
 #   vpc_id      = var.vpc_id
@@ -113,6 +111,33 @@ resource "aws_alb_target_group" "mdmdirector" {
 
   dynamic "health_check" {
     for_each = [var.mdmdirector_health_check]
+    content {
+      enabled             = lookup(health_check.value, "enabled", null)
+      interval            = lookup(health_check.value, "interval", null)
+      path                = lookup(health_check.value, "path", null)
+      port                = lookup(health_check.value, "port", null)
+      protocol            = lookup(health_check.value, "protocol", null)
+      timeout             = lookup(health_check.value, "timeout", null)
+      healthy_threshold   = lookup(health_check.value, "healthy_threshold", null)
+      unhealthy_threshold = lookup(health_check.value, "unhealthy_threshold", null)
+      matcher             = lookup(health_check.value, "matcher", null)
+    }
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+// Enroll Endpoint target group //
+resource "aws_alb_target_group" "enroll_endpoint" {
+  name_prefix = "eendtg"
+  port        = var.enroll_endpoint_app_port
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  dynamic "health_check" {
+    for_each = [var.enroll_endpoint_health_check]
     content {
       enabled             = lookup(health_check.value, "enabled", null)
       interval            = lookup(health_check.value, "interval", null)
@@ -197,6 +222,22 @@ resource "aws_alb_listener_rule" "mdmdirector" {
   condition {
     path_pattern {
       values = ["/v1/commands", "/v1/commands/*"]
+    }
+  }
+}
+
+resource "aws_alb_listener_rule" "enroll_endpoint" {
+  listener_arn = aws_alb_listener.https.arn
+  # priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.enroll_endpoint.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/enroll", "/enroll/*"]
     }
   }
 }

@@ -15,28 +15,39 @@ variable "app_name" {
   default = "nanomdm"
 }
 
+// SCEP //
 variable "scep_repository_name" {
   type        = string
   description = "SCEP ECR Repository Name"
   default = "scep"
 }
 
+// NanoMDM //
 variable "nanomdm_repository_name" {
   type        = string
   description = "NanoMDM ECR Repository Name"
   default = "nanomdm"
 }
 
+// Micro2Nano //
 variable "micro2nano_repository_name" {
   type = string
   description = "Micro2nano ECR Repository Name"
   default = "micro2nano"
 }
 
+// MDMDirector //
 variable "mdmdirector_repository_name" {
   type = string
   description = "MDMDirector ECR Repository Name"
   default = "mdmdirector"
+}
+
+// Enroll Endpoint //
+variable "enroll_endpoint_repository_name" {
+  type = string
+  description = "Enroll Endpoint ECR Repository Name"
+  default = "enroll_endpoint"
 }
 
 variable "image_tag_mutability" {
@@ -112,17 +123,17 @@ variable "public_key" {
   default = ""
 }
 
-variable "enrollment_profile_object_name" {
-  description = "Key in s3 referencing the enrollment.mobileconfig"
-  type        = string
-  default = "enrollment.mobileconfig"
-}
+# variable "enrollment_profile_object_name" {
+#   description = "Key in s3 referencing the enrollment.mobileconfig"
+#   type        = string
+#   default = "enrollment.mobileconfig"
+# }
 
-variable "enrollment_profile_source_path" {
-  description = "Local source for enrollment.mobileconfig"
-  type        = string
-  default = "../app/enrollment.mobileconfig"
-}
+# variable "enrollment_profile_source_path" {
+#   description = "Local source for enrollment.mobileconfig"
+#   type        = string
+#   default = "../app/enrollment.mobileconfig"
+# }
 
 
 # variable "AWS_ACCESS_KEY" {}

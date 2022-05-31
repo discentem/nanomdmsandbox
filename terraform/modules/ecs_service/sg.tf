@@ -132,6 +132,15 @@ resource "aws_security_group_rule" "mdmdirector_ingress_ecs_service" {
   source_security_group_id = aws_security_group.lb.id
 }
 
+resource "aws_security_group_rule" "enroll_endpoint_ingress_ecs_service" {
+  security_group_id = aws_security_group.ecs_service.id
+  type              = "ingress"
+  protocol          = "tcp"
+  from_port         = var.enroll_endpoint_app_port
+  to_port           = var.enroll_endpoint_app_port
+  source_security_group_id = aws_security_group.lb.id
+}
+
 resource "aws_security_group_rule" "https_ingress_ecs_service" {
   security_group_id = aws_security_group.ecs_service.id
   type              = "ingress"

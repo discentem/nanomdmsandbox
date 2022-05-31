@@ -11,6 +11,18 @@ locals {
       value = v
     }
   ]
+  micro2nano_task_environment = [
+    for k, v in var.micro2nano_task_container_environment : {
+      name  = k
+      value = v
+    }
+  ]
+  enroll_endpoint_task_environment = [
+    for k, v in var.enroll_endpoint_task_container_environment : {
+      name  = k
+      value = v
+    }
+  ]
 }
 
 // NanoMDM Task Definition //
@@ -55,6 +67,10 @@ module "nanomdm" {
     {
       "name": "MYSQL_DSN",
       "valueFrom": "${var.mysql_secrets_manager_arn}:MYSQL_DSN::"
+    },
+    {
+      "name": "API_KEY",
+      "valueFrom": "${var.nanomdm_secrets_manager_arn}:API_KEY::"
     }
   ]
 
@@ -92,6 +108,13 @@ module "scep" {
     }
   }
 
+  secrets = [
+    {
+      "name": "CHALLENGE",
+      "valueFrom": "${var.scep_secrets_manager_arn}:SCEP_CHALLENGE::"
+    }
+  ]
+
   environment = local.task_environment
 
   memory = var.scep_task_definition_memory
@@ -126,7 +149,18 @@ module "micro2nano" {
     }
   }
 
-  environment = local.task_environment
+  secrets = [
+    {
+      "name": "NANO_API_KEY",
+      "valueFrom": "${var.nanomdm_secrets_manager_arn}:API_KEY::"
+    },
+    {
+      "name": "MICROMDM_API_KEY",
+      "valueFrom": "${var.micro2nano_secrets_manager_arn}:MICROMDM_API_KEY::"
+    }
+  ]
+
+  environment = local.micro2nano_task_environment
 
   memory = var.micro2nano_task_definition_memory
   cpu    = var.micro2nano_task_definition_cpu
@@ -172,6 +206,14 @@ module "mdmdirector" {
     {
       "name": "DB_HOSTNAME",
       "valueFrom": "${var.psql_secrets_manager_arn}:PSQL_HOSTNAME::"
+    },
+    {
+      "name": "MICROMDM_API_KEY",
+      "valueFrom": "${var.micro2nano_secrets_manager_arn}:MICROMDM_API_KEY::"
+    },
+    {
+      "name": "MDMDIRECTOR_API_KEY",
+      "valueFrom": "${var.mdmdirector_secrets_manager_arn}:MDMDIRECTOR_API_KEY::"
     }
   ]
 
@@ -217,6 +259,47 @@ module "redis" {
   register_task_definition = false
 }
 
+// Enroll Endpoint Task Definition //
+module "enroll_endpoint" {
+  source = "../../modules/ecs_task_definition"
+
+  name =  "${var.app_name}-enroll-endpoint"
+
+  image     = "${var.enroll_endpoint_container_image}"
+  essential = false
+
+  portMappings = [
+    {
+      containerPort =  var.enroll_endpoint_app_port
+      hostPort = var.enroll_endpoint_app_port
+      protocol = "tcp"
+    },
+  ]
+
+  logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group = "${aws_cloudwatch_log_group.main.name}"
+      awslogs-region ="${data.aws_region.current.name}"
+      awslogs-stream-prefix = "ecs"
+    }
+  }
+
+  secrets = [
+    {
+      "name": "SCEP_CHALLENGE",
+      "valueFrom": "${var.scep_secrets_manager_arn}:SCEP_CHALLENGE::"
+    }
+  ]
+
+  environment = local.enroll_endpoint_task_environment
+
+  memory = var.enroll_endpoint_task_definition_memory
+  cpu    = var.enroll_endpoint_task_definition_cpu
+
+  register_task_definition = false
+}
+
 
 // Combine all task definitions //
 module "merged" {
@@ -228,6 +311,7 @@ module "merged" {
    "${module.micro2nano.container_definitions}",
    "${module.mdmdirector.container_definitions}",
    "${module.redis.container_definitions}",
+   "${module.enroll_endpoint.container_definitions}",
  ]
 }
 
@@ -378,6 +462,11 @@ resource "aws_ecs_service" "service" {
     container_port   = var.mdmdirector_app_port
   }
 
+  load_balancer {
+    target_group_arn = aws_alb_target_group.enroll_endpoint.arn
+    container_name   = "${var.app_name}-enroll-endpoint"
+    container_port   = var.enroll_endpoint_app_port
+  }
 
   deployment_controller {
     type = var.deployment_controller_type
