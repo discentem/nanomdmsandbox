@@ -141,12 +141,13 @@ variable "password" {
   description = "Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "port" {
   description = "The port on which the DB accepts connections"
   type        = string
-  default     = null
+  default     = "3306"
 }
 
 variable "availability_zone" {

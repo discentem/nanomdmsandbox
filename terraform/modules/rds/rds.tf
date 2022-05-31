@@ -24,12 +24,13 @@ module "rds_mysql" {
 
   db_name  = var.db_name
   username = "root"
+  create_random_password = local.create_random_password
   password = local.password
-  port     = "3306"
+
+  port     = var.port
 
   publicly_accessible = false
 
-  create_random_password = var.create_random_password
   create_db_instance = local.create_db_instance
 
   iam_database_authentication_enabled = true
