@@ -35,6 +35,12 @@ module "mdmdirector_ecr" {
   image_tag_mutability = var.image_tag_mutability
 }
 
+module "enroll_endpoint_ecr" {
+  source               = "./modules/ecr"
+  repository_name      = var.enroll_endpoint_repository_name
+  image_tag_mutability = var.image_tag_mutability
+}
+
 module "route53" {
   source      = "./modules/route53"
   domain_name = var.domain_name
@@ -104,6 +110,83 @@ module "rds_aurora_psql_mdmdirector_secret" {
     PSQL_USERNAME = module.rds_aurora_psql_mdmdirector.cluster_master_username,
     PSQL_PASSWORD = module.rds_aurora_psql_mdmdirector.cluster_master_password,
     PSQL_HOSTNAME = module.rds_aurora_psql_mdmdirector.cluster_endpoint,
+  })
+}
+
+resource "random_password" "scep_challenge" {
+  length  = "20"
+  special = false
+}
+
+module "scep_secrets" {
+  source = "./modules/secrets"
+
+  name   = "scep_secrets"
+
+  aws_region           = var.aws_region
+  aws_account_id       = data.aws_caller_identity.current.account_id
+  
+  secret_string        = jsonencode(
+  { 
+    SCEP_CHALLENGE = random_password.scep_challenge.result,
+  })
+}
+
+resource "random_password" "nanomdm_api_key" {
+  length  = "20"
+  special = false
+}
+
+module "nanomdm_secrets" {
+  source = "./modules/secrets"
+
+  name   = "nanomdm_secrets"
+
+  aws_region           = var.aws_region
+  aws_account_id       = data.aws_caller_identity.current.account_id
+  
+  secret_string        = jsonencode(
+  { 
+    API_KEY = random_password.nanomdm_api_key.result,
+  })
+}
+
+
+resource "random_password" "micro2nano_micromdm_api_key" {
+  length  = "20"
+  special = false
+}
+
+module "micro2nano_secrets" {
+  source = "./modules/secrets"
+
+  name   = "micro2nano_secrets"
+
+  aws_region           = var.aws_region
+  aws_account_id       = data.aws_caller_identity.current.account_id
+  
+  secret_string        = jsonencode(
+  { 
+    MICROMDM_API_KEY = random_password.micro2nano_micromdm_api_key.result,
+  })
+}
+
+resource "random_password" "mdmdirector_api_key" {
+  length  = "20"
+  special = false
+}
+
+module "mdmdirector_secrets" {
+  source = "./modules/secrets"
+
+  name   = "mdmdirector_secrets"
+
+  aws_region           = var.aws_region
+  aws_account_id       = data.aws_caller_identity.current.account_id
+  
+  secret_string        = jsonencode(
+  { 
+    MDMDIRECTOR_API_KEY = random_password.mdmdirector_api_key.result,
   })
 }
 
@@ -231,6 +314,8 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
+  scep_secrets_manager_arn = module.scep_secrets.arn
+
   // NanoMDM tasks //
   nanomdm_container_image = "${module.nanomdm_ecr.repository_url}:latest"
   nanomdm_app_port        = 9000
@@ -254,6 +339,8 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
+  nanomdm_secrets_manager_arn = module.nanomdm_secrets.arn
+
   // MDMDirector tasks //
   mdmdirector_container_image = "${module.mdmdirector_ecr.repository_url}:latest"
   mdmdirector_app_port        = 8000
@@ -276,9 +363,14 @@ module "ecs_nanomdm" {
     unhealthy_threshold = "2"
   }
 
+  mdmdirector_secrets_manager_arn = module.mdmdirector_secrets.arn
+
   // micro2nano tasks //
   micro2nano_container_image = "${module.micro2nano_ecr.repository_url}:latest"
   micro2nano_app_port        = 9001
+  micro2nano_task_container_environment = {
+    NANO_URL       = "http://127.0.0.1:9000/v1/enqueue",
+  }
 
   micro2nano_task_definition_cpu    = 128
   micro2nano_task_definition_memory = 256
@@ -294,6 +386,32 @@ module "ecs_nanomdm" {
   #   unhealthy_threshold = "2"
   # }
 
+  micro2nano_secrets_manager_arn = module.micro2nano_secrets.arn
+
+  // Enroll Endpoint tasks //
+  enroll_endpoint_container_image = "${module.enroll_endpoint_ecr.repository_url}:latest"
+  enroll_endpoint_app_port        = 9300
+
+  enroll_endpoint_task_definition_cpu    = 128
+  enroll_endpoint_task_definition_memory = 256
+
+  enroll_endpoint_health_check = {
+    port                = "traffic-port"
+    path                = "/health"
+    health_threshold    = "3"
+    interval            = "60"
+    protocol            = "HTTP"
+    matcher             = "200"
+    timeout             = "3"
+    unhealthy_threshold = "2"
+  }
+
+  enroll_endpoint_task_container_environment = {
+    APP_NAME       = var.app_name,
+    COMPANY        = "corporation",
+    BASE_URL       = "https://mdm-infra.${var.domain_name}"
+  }
+
   // Public CIDRs to allow access to the load balancers //
   public_inbound_cidr_blocks_ipv4 = var.public_inbound_cidr_blocks_ipv4
   public_inbound_cidr_blocks_ipv6 = var.public_inbound_cidr_blocks_ipv6
@@ -304,8 +422,8 @@ module "ecs_nanomdm" {
 #   depends_on = [module.nanomdm_ecr.repository_url, module.scep_ecr.repository_url]
 # }
 
-module "enrollment_profile" {
-  source = "./modules/s3"
-  bucket_name = var.domain_name
-  enrollment_profile_source_path = var.enrollment_profile_source_path
-}
+# module "enrollment_profile" {
+#   source = "./modules/s3"
+#   bucket_name = var.domain_name
+#   enrollment_profile_source_path = var.enrollment_profile_source_path
+# }

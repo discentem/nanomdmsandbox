@@ -32,13 +32,12 @@ module "aurora_postgresql_serverless_v2" {
 
   allowed_cidr_blocks   = var.allowed_cidr_blocks
 
-  create_random_password = var.create_random_password
+  create_random_password = local.create_random_password
+  master_password = local.master_password
 
   # iam_database_authentication_enabled = true
 
   database_name = var.database_name
-
-  master_password = local.master_password
 
   monitoring_interval = 60
 
