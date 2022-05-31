@@ -23,8 +23,8 @@ ARG MYSQL_HOSTNAME
 ENV MYSQL_HOSTNAME $MYSQL_HOSTNAME
 ARG APP_NAME
 ENV APP_NAME $APP_NAME
-# ARG MYSQL_PORT
-# ENV MYSQL_PORT $MYSQL_PORT
+ARG WEBHOOK
+ENV WEBHOOK $WEBHOOK
 
 WORKDIR /service/nanomdm
 
@@ -40,4 +40,4 @@ ENV MYSQL_DSN $MYSQL_DSN
 
 EXPOSE 9000
 
-CMD ./nanomdm-linux-amd64 -debug -ca ca.pem -api $API_KEY -storage mysql -dsn "${MYSQL_DSN}"
+CMD ./nanomdm-linux-amd64 -debug -ca ca.pem -api $API_KEY -storage mysql -dsn "${MYSQL_DSN}" -webhook-url $WEBHOOK

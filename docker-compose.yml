@@ -26,6 +26,7 @@ services:
       args:
         - NANOMDM_VERSION=0.2.0
         - API_KEY=nanomdm
+        - WEBHOOK=http://127.0.0.1:8000/webhook
     ports:
       - "9000:9000"
     depends_on:

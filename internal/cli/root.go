@@ -41,7 +41,7 @@ func init() {
 
 	enrollEndpoint.Flags().StringVar(&port, "port", "9300", "port for enroll endpoint")
 
-	pushProfile.Flags().StringVar(&cfppath, "path", "app/desktop-setting.mobileconfig", "path to profile to push to director")
+	pushProfile.Flags().StringVar(&cfppath, "path", "config_profiles/desktop-setting.mobileconfig", "path to profile to push to director")
 	pushProfile.Flags().StringVar(&deviceUUID, "device", "", "device UUID to push profile to")
 	pushProfile.Flags().StringVar(&password, "password", env.String("MDMDIRECTOR_PASSWORD", ""), "pass for mdmdirector post requests")
 	rootCmd.AddCommand(enrollEndpoint)

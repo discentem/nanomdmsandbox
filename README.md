@@ -1,6 +1,6 @@
 # Nanomdmsandbox
 
-## Prereqs
+## Prerequisites
 
 1. Buy a domain. There are registrars you can choose from but we are partial to namecheap.com.
 1. Create an AWS account.
@@ -15,21 +15,23 @@
 1. `brew install tfenv`
 1. Generate SCEP default CA files which outputs to a `depot` folder. This is required for the SCEP and NanoMDM containers
     ```bash
-    https://github.com/micromdm/scep/releases/download/v2.1.0/scepserver-darwin-amd64-v2.1.0.zip`
+    curl https://github.com/micromdm/scep/releases/download/v2.1.0/scepserver-darwin-amd64-v2.1.0.zip -o scepserver-darwin-amd64
     ./scepserver-darwin-amd64 ca -init
     ```
-1. Save this `depot` folder within `app/config/certs/depot`
+1. Save this `depot` folder within `docker/config/certs/depot`
 1. Install Terraform 1.1.9 
 
     `tfenv install 1.1.9`
 
 1. Create terraform variable files
-    1. cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
-    1. cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
-      1. Fill in secrets
-      1. ipv4 CIDR BLOCKS
-      1. root domain name
-
+        ```bash
+        cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
+        cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
+        ```
+1. Fill in the secrets:
+    1. `public_inbound_cidr_blocks_ipv4`
+    1. `domain_name`, which should be `acme.co`. The Terraform will create a `mdm-infra` subdomain.
+    1. `public_key` <-- used for sshing to the ec2 instance which is pre-configured with access to the mysql rds instance where you need to run
 1. Activate Terraform 1.1.9 within tfenv
     ```bash
     tfenv use 1.1.9
@@ -44,7 +46,7 @@
 
     Okay finally! Time to run Terraform...
 
-1. Create the TF remote state. You don't have to use S3 backend and can use whatever you want but this project used an S3 bucket for ease of collaboration while working on Terraform.
+1. Create the TF remote state. You don't have to use S3 backend and can use whatever you want but this project recommends an S3 bucket for ease of collaboration while working on Terraform.
     ```bash
     make tf-remote-state-init AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
     ```
@@ -54,7 +56,7 @@
     make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
     ```
 1. Point domain at your nameservers that were just created - this is external to AWS and will be specific to your registrar.
-1. WAIT FOR DNS PROPAGATION. This will take a while... go grab yourself a nice dinner.
+1. **WAIT FOR DNS PROPAGATION**. This will take a while... go grab yourself a nice dinner.
 1. Run the plan
     ```
     make tf-plan
@@ -70,6 +72,20 @@
 
 1. Run the schema file. You can use the provided EC2 instance or any other way to upload the base SQL schema to the newly created RDS or your own RDS instance. You can grab the schema file at https://github.com/micromdm/nanomdm/blob/main/storage/mysql/schema.sql
 
+1. Optional: ssh to the provided ec2 box
+
+    ```bash
+    ssh -i ~/.ssh/ec2.pub ec2-user@THE.IP
+    ```
+
+1. Obtain the schema file.
+
+    ```bash
+    curl https://raw.githubusercontent.com/micromdm/nanomdm/main/storage/mysql/schema.sql -o schema.sql
+    ```
+
+1. Run the schema file.
+
     ```bash
     mysql -h ${RDS_HOST} -P 3306 -u ${USER_NAME} -p nanomdm < schema.sql
     ```
@@ -79,19 +95,21 @@
       ```
       make ecs-update-service CLUSTER=production-nanomdm-cluster SERVICE=nanomdm
       ```
-    - Adjust `CLUSTER` and `SERVICE` to match what you specified in Terraform app_variables
+    Adjust `CLUSTER` and `SERVICE` to match what you specified in Terraform app_variables
 
 ### Upload APNS Certificate
 
-FILL IN DETAILS!
+```bash
+cat /path/to/mdm_push_cert.pem /path/to/mdmcert.download.push.key | curl -T - -u nanomdm:nanomdm 'https://mdm-infra.acme.co/v1/pushcert'
+```
 
 ### Send a push notification
 
-FILL IN DETAILS!
-
 ### Set a wallpaper
 
-FILL IN DETAILS!
+```bash
+python3 ~/nanomdm/tools/cmdr.py InstallProfile config_profiles/desktop-setting.mobileconfig | curl -T - -u nanomdm:nanomdm 'https://mdm-infra.acme.co/v1/enqueue/UUID_GOES_HERE'
+```
 
 ## Adding new containers
 
