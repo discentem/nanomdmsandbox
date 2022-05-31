@@ -21,6 +21,14 @@ func (t rawTime) Time() (time.Time, error) {
 	return time.Parse("2006-01-02 15:04:05", string(t))
 }
 
+func (t rawTime) Format(layout string) (string, error) {
+	gt, err := t.Time()
+	if err != nil {
+		return "", err
+	}
+	return gt.Format(layout), nil
+}
+
 type Enrollment struct {
 	Id               string         `json:"id"`
 	DeviceID         string         `json:"device_id"`
@@ -42,29 +50,8 @@ type DeviceDTO struct {
 	SerialNumber     string           `json:"serial_number"`
 	UDID             string           `json:"udid"`
 	EnrollmentStatus bool             `json:"enrollment_status"`
-	LastSeen         time.Time        `json:"last_seen"`
-	DEPProfileStatus DEPProfileStatus `json:"dep_profile_status"`
-}
-type DeviceDTOLastSeenString struct {
-	SerialNumber     string           `json:"serial_number"`
-	UDID             string           `json:"udid"`
-	EnrollmentStatus bool             `json:"enrollment_status"`
 	LastSeen         string           `json:"last_seen"`
 	DEPProfileStatus DEPProfileStatus `json:"dep_profile_status"`
-}
-
-func DevicesWithRFC3339Nano(devices []DeviceDTO) []DeviceDTOLastSeenString {
-	var nDevices []DeviceDTOLastSeenString
-	for _, d := range devices {
-		nDevices = append(nDevices, DeviceDTOLastSeenString{
-			SerialNumber:     d.SerialNumber,
-			UDID:             d.UDID,
-			EnrollmentStatus: d.EnrollmentStatus,
-			LastSeen:         d.LastSeen.Format(time.RFC3339Nano),
-			DEPProfileStatus: d.DEPProfileStatus,
-		})
-	}
-	return nDevices
 }
 
 var (
@@ -90,8 +77,7 @@ func main() {
 			fmt.Println("failed parsing enrollment")
 			log.Fatal(err)
 		}
-		fmt.Println(e.LastSeenAt)
-		lsa, err := e.LastSeenAt.Time()
+		lsa, err := e.LastSeenAt.Format(time.RFC3339Nano)
 		if err != nil {
 			fmt.Println("failed parsing time")
 			log.Fatal(err)
@@ -125,19 +111,11 @@ func main() {
 		ddto.SerialNumber = s.Serial
 		devices = append(devices, ddto)
 	}
-	for _, d := range devices {
-		fmt.Printf(
-			"LastSceen: %s; EnrollmentStatus: %t; SerialNumber: %s; DEPProfileStatus: %s; UDID: %s",
-			d.LastSeen, d.EnrollmentStatus, d.SerialNumber,
-			d.DEPProfileStatus, d.UDID,
-		)
-	}
 
 	devicesHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Set("Content-Type", "application/json")
-		fDevices := DevicesWithRFC3339Nano(devices)
-		jsonResp, err := json.Marshal(fDevices)
+		jsonResp, err := json.Marshal(devices)
 		if err != nil {
 			log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 		}
