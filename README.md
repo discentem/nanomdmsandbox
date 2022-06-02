@@ -8,6 +8,8 @@
 
     > :warning: You can alternatively give the IAM credentials `AdministratorAccess` but this is not recommended.
 
+### Generate APNS Certificate
+
 1. Generate an APNS Certificate. Checkout https://github.com/micromdm/micromdm/blob/main/docs/user-guide/quickstart.md#configure-an-apns-certificate and https://micromdm.io/blog/certificates/ for info about this step.
 
 ## Getting started
@@ -15,10 +17,8 @@
 1. `brew install tfenv`
 1. Generate SCEP default CA files which outputs to a `depot` folder. This is required for the SCEP and NanoMDM containers
     ```bash
-    curl https://github.com/micromdm/scep/releases/download/v2.1.0/scepserver-darwin-amd64-v2.1.0.zip -o scepserver-darwin-amd64
-    ./scepserver-darwin-amd64 ca -init
+    sh scripts/depot.sh
     ```
-1. Save this `depot` folder within `docker/config/certs/depot`
 1. Install Terraform 1.1.9 
 
     `tfenv install 1.1.9`
@@ -27,11 +27,12 @@
         ```bash
         cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
         cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
+        cp terraform/example_tfvars/_backend.tf terraform/backend.tf
         ```
 1. Fill in the secrets:
     1. `public_inbound_cidr_blocks_ipv4`
-    1. `domain_name`, which should be `acme.co`. The Terraform will create a `mdm-infra` subdomain.
-    1. `public_key` <-- used for sshing to the ec2 instance which is pre-configured with access to the mysql rds instance where you need to run
+    1. `domain_name`, which should be `acme.co` (replace with your real domain name). Later, when you do `make tf-apply` a `mdm-infra` subdomain will be created: `mdm-infra.acme.co`.
+    1. `public_key` <-- used for sshing to the ec2 instance which is pre-configured with access to the mysql rds instance where you need to later upload the mysql schema.
 1. Activate Terraform 1.1.9 within tfenv
     ```bash
     tfenv use 1.1.9
@@ -48,14 +49,22 @@
 
 1. Create the TF remote state. You don't have to use S3 backend and can use whatever you want but this project recommends an S3 bucket for ease of collaboration while working on Terraform.
     ```bash
-    make tf-remote-state-init AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
+    make tf-remote-state-init
     ```
+1. Copy outputted `bucket_name` to the corresponding filed in `terraform/backend.tf`.
+
+1. Copy your `mdm_push_cert.pem` into place. See [Generate APNS Certificate](#generate-apns-certificate) for more info.
+
+```shell
+cp /path/to/mdm_push_cert.pem docker/config/certs/mdm_push_cert.pem
+```
 
 1. Now the "first run" stuff can be launched. Among other things, this creates proper Route53 NS associations that can be used to manage all sub-domain or root domain operations for any of the required Route53 records within the module. 
     ```bash
-    make tf-first-run AWS_ACCOUNT_ID=$ACCOUNT_ID AWS=$AWS_REGION
+    make tf-first-run
     ```
-1. Point domain at your nameservers that were just created - this is external to AWS and will be specific to your registrar.
+1. Make note of the nameservers that were just created. Navigate to https://us-east-1.console.aws.amazon.com/route53/v2/hostedzones# and then click on your domain name.
+1. Point domain at these nameservers that you just noted. This process is external to AWS and will be specific to your registrar.
 1. **WAIT FOR DNS PROPAGATION**. This will take a while... go grab yourself a nice dinner.
 1. Run the plan
     ```

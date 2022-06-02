@@ -14,7 +14,7 @@ package
 *.tfstate
 *.tfstate.backup
 *.terraform.tfstate.lock.info
-*backend.tf
+backend.tf
 
 # MacOS
 .DS_Store
