@@ -66,6 +66,13 @@ cp /path/to/mdm_push_cert.pem docker/config/certs/mdm_push_cert.pem
 1. Make note of the nameservers that were just created. Navigate to https://us-east-1.console.aws.amazon.com/route53/v2/hostedzones# and then click on your domain name.
 1. Point domain at these nameservers that you just noted. This process is external to AWS and will be specific to your registrar.
 1. **WAIT FOR DNS PROPAGATION**. This will take a while... go grab yourself a nice dinner.
+1. Confirm that the DNS has propagated by digging against various DNS providers like Google and CloudFlare. 
+
+```shell
+dig @8.8.8.8 +short NS INSERT_YOUR_DOMAIN_HERE
+dig @1.1.1.1 +short NS INSERT_YOUR_DOMAIN_HERE
+```
+
 1. Run the plan
     ```
     make tf-plan
