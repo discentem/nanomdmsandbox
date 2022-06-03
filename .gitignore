@@ -20,7 +20,9 @@ backend.tf
 .DS_Store
 
 # vscode
-.vscode/vendor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 
 # python
 __pycache__
