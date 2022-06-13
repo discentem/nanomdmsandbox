@@ -24,11 +24,11 @@
     `tfenv install 1.1.9`
 
 1. Create terraform variable files
-        ```bash
-        cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
-        cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
-        cp terraform/example_tfvars/_backend.tf terraform/backend.tf
-        ```
+    ```
+    cp terraform/example_tfvars/config.auto.tfvars.json terraform/config.auto.tfvars.json
+    cp terraform/example_tfvars/example-secrets.auto.tfvar.json terraform/secrets.auto.tfvars.json
+    cp terraform/example_tfvars/_backend.tf terraform/backend.tf
+    ```
 1. Fill in the secrets:
     1. `public_inbound_cidr_blocks_ipv4`
     1. `domain_name`, which should be `acme.co` (replace with your real domain name). Later, when you do `make tf-apply` a `mdm-infra` subdomain will be created: `mdm-infra.acme.co`.
