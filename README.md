@@ -33,7 +33,7 @@ Nanomdmsandbox is a project that tries to make it easier (for some definition of
     ```
 1. Fill in the secrets:
     1. `public_inbound_cidr_blocks_ipv4`
-    1. `domain_name`, which should be `acme.co` (replace with your real domain name). Later, when you do `make tf-apply` a `mdm-infra` subdomain will be created: `mdm-infra.acme.co`.
+    1. `domain_name`, which should be `acme.co` (replace with your real domain name). Later, when you do `make tf-apply` a `mdm-infra` subdomain will be automatically created: `mdm-infra.acme.co`.
     1. `public_key` <-- used for sshing to the ec2 instance which is pre-configured with access to the mysql rds instance where you need to later upload the mysql schema.
 1. Activate Terraform 1.1.9 within tfenv
     ```bash
