@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-1. Buy a domain. There are registrars you can choose from but we are partial to namecheap.com.
+1. Buy a domain. There are many registrars you can choose from but we are partial to namecheap.com.
 1. Create an AWS account.
 1. Generate IAM credentials with access to manage ECS, RDS, and the other services in this project. 
 
