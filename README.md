@@ -1,5 +1,7 @@
 # Nanomdmsandbox
 
+Nanomdmsandbox is a project that tries to make it easier (for some definition of easy) to spin up a development/testing environment for https://github.com/micromdm/nanomdm. It definitely approaches something that could be production ready, but might require tweaks for your environment. 
+
 ## Prerequisites
 
 1. Buy a domain. There are many registrars you can choose from but we are partial to namecheap.com.
