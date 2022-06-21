@@ -191,4 +191,7 @@ cli: deps # go build
 gen_enrollment: cli
 	./build/cli create_enrollment
 
+diagram:
+	cd docs/diagram; go build -o $(BUILD_DIR)/diagram
+
 .PHONY: .check-args

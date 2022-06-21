@@ -39,3 +39,6 @@ enrollment.mobileconfig
 
 # config
 docker/config/*
+
+# diagram
+assets/

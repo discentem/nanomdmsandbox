@@ -3,7 +3,9 @@ module github.com/discentem/nanomdmsandbox
 go 1.17
 
 require (
+	github.com/blushft/go-diagrams v0.0.0-20201006005127-c78c821223d9
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/goccy/go-graphviz v0.0.9
 	github.com/groob/plist v0.0.0-20220217120414-63fa881b19a5
 	github.com/manifoldco/promptui v0.9.0
 	github.com/micromdm/micromdm v1.9.0
@@ -13,12 +15,15 @@ require (
 )
 
 require (
+	github.com/awalterschulze/gographviz v0.0.0-20200901124122-0eecad45bd71 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/fogleman/gg v1.3.0 // indirect
 	github.com/garyburd/go-oauth v0.0.0-20180319155456-bca2e7f09a17 // indirect
 	github.com/go-kit/kit v0.7.0 // indirect
 	github.com/go-logfmt/logfmt v0.3.0 // indirect
 	github.com/go-stack/stack v1.7.0 // indirect
-	github.com/google/uuid v1.1.1 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/groob/finalizer v0.0.0-20170707115354-4c2ed49aabda // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -26,6 +31,7 @@ require (
 	github.com/micromdm/scep/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.mozilla.org/pkcs7 v0.0.0-20210826202110-33d05740a352 // indirect
+	golang.org/x/image v0.0.0-20200119044424-58c23975cae1 // indirect
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
 	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
