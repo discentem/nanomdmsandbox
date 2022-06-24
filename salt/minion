@@ -1,2 +1,0 @@
-# disable to make runs quick on macOS
-enable_fqdns_grains: False
