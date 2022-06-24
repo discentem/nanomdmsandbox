@@ -1,6 +1,8 @@
 # Nanomdmsandbox
 
-Nanomdmsandbox is a project that tries to make it easier (for some definition of easy) to spin up a development/testing environment for https://github.com/micromdm/nanomdm. It definitely approaches something that could be production ready, but might require tweaks for your environment. 
+## Summary
+
+Nanomdmsandbox is a project that tries to make it easier for folks to spin up a sandbox environment for [nanomdm](https://github.com/micromdm/nanomdm). See our MacDevOpsYVR22 talk [Open Source MDM in a (Sand)Box](https://www.youtube.com/watch?v=yoFZXsCEvUc) for more info and background about this project!
 
 ## Prerequisites
 
