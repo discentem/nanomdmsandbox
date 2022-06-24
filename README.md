@@ -4,6 +4,10 @@
 
 Nanomdmsandbox is a project that tries to make it easier for folks to spin up a sandbox environment for [nanomdm](https://github.com/micromdm/nanomdm). See our MacDevOpsYVR22 talk [Open Source MDM in a (Sand)Box](https://www.youtube.com/watch?v=yoFZXsCEvUc) for more info and background about this project!
 
+## Architecture Diagram
+
+![diagram](images/diagram.png)
+
 ## Prerequisites
 
 1. Buy a domain. There are many registrars you can choose from but we are partial to namecheap.com.
@@ -157,26 +161,4 @@ You must enable these experimental docker features in your docker_config if buil
     "buildkit": true
   }
 }
-```
-
-## Salt
-
-## Linux 
-
-### Sync files
-
-```
-rsync -e "ssh -i ~/.ssh/do" -r ~/nanomdmsandbox/salt/* root@SERVER_IP:/srv
-```
-
-```shell
-sudo salt-call --local state.apply
-```
-
-## macOS
-
-From root of this project:
-
-```shell
-sudo salt-call --local state.apply --file-root salt/salt --pillar-root salt/pillar --log-level info -c ${PWD}/salt
 ```
