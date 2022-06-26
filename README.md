@@ -8,7 +8,7 @@ Nanomdmsandbox is a project that tries to make it easier for folks to spin up a 
 
 ![diagram](images/diagram.png)
 
-> > :warning: `micro2nano` and `mdmdirector` services are not functional yet. 
+> :warning: `micro2nano` and `mdmdirector` services are not functional yet. 
 
 ## Prerequisites
 
