@@ -8,6 +8,8 @@ Nanomdmsandbox is a project that tries to make it easier for folks to spin up a 
 
 ![diagram](images/diagram.png)
 
+> > :warning: `micro2nano` and `mdmdirector` services are not functional yet. 
+
 ## Prerequisites
 
 1. Buy a domain. There are many registrars you can choose from but we are partial to namecheap.com.
